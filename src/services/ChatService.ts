@@ -9,6 +9,8 @@ export interface ChatStreamMessage {
 export interface SourceRef {
   chunk_id: string;
   document_id: string;
+  filename?: string | null;
+  url?: string | null;
   score: number;
 }
 

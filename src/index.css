@@ -1750,6 +1750,9 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex; align-items: center; gap: 4px;
 }
 .cite .ix { color: var(--teal-deep); font-weight: 500; }
+a.cite { text-decoration: none; cursor: pointer; }
+a.cite:hover { background: var(--paper-2, var(--paper)); border-color: var(--teal-deep); color: var(--ink); }
+a.cite:hover .ix { color: var(--teal-deep); }
 
 .chat-suggestions {
   display: flex; flex-direction: column; gap: 6px;

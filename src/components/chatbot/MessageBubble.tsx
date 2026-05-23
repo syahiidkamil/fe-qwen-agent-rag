@@ -14,11 +14,24 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className="bubble">{message.text}</div>
       {message.sources && message.sources.length > 0 && (
         <div className="msg-cite">
-          {message.sources.map((s, i) => (
-            <span className="cite" key={s.id}>
-              <span className="ix">[{i + 1}]</span> {truncate(s.name)}
-            </span>
-          ))}
+          {message.sources.map((s, i) =>
+            s.url ? (
+              <a
+                key={s.id}
+                className="cite"
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={s.name}
+              >
+                <span className="ix">[{i + 1}]</span> {truncate(s.name)}
+              </a>
+            ) : (
+              <span className="cite" key={s.id}>
+                <span className="ix">[{i + 1}]</span> {truncate(s.name)}
+              </span>
+            ),
+          )}
         </div>
       )}
     </div>

@@ -24,13 +24,17 @@ function welcomeMessage(): ChatMessage {
 }
 
 function sourcesToChat(refs: SourceRef[]): ChatMessage["sources"] {
-  // Dedupe by document_id; show as [doc-<short>] until we expose filenames via API.
+  // Dedupe by document_id; prefer the real filename when the backend supplied one.
   const seen = new Set<string>();
   const out: NonNullable<ChatMessage["sources"]> = [];
   for (const r of refs) {
     if (seen.has(r.document_id)) continue;
     seen.add(r.document_id);
-    out.push({ id: r.document_id, name: `doc-${r.document_id.slice(0, 6)}` });
+    out.push({
+      id: r.document_id,
+      name: r.filename || `doc-${r.document_id.slice(0, 6)}`,
+      url: r.url ?? undefined,
+    });
   }
   return out;
 }

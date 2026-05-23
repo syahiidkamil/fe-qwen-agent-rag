@@ -1,6 +1,7 @@
 export interface ChatSource {
   id: string;
   name: string;
+  url?: string;
 }
 
 export interface ChatMessage {
