@@ -16,6 +16,8 @@ export interface StreamCallbacks {
   onSession?: (sessionId: string) => void;
   onSources?: (sources: SourceRef[]) => void;
   onToken: (delta: string) => void;
+  /** Server-side error event (e.g. LLM API failure) inside the SSE stream. */
+  onServerError?: (message: string) => void;
   onDone: (full: string) => void;
   onError: (err: Error) => void;
 }
@@ -78,6 +80,8 @@ export async function streamChat(
         else if (ev.type === "token" && ev.delta) {
           full += ev.delta;
           cb.onToken(ev.delta);
+        } else if (ev.type === "error") {
+          cb.onServerError?.(ev.message ?? ev.code ?? "Unknown server error");
         } else if (ev.type === "done") {
           full = ev.full_text ?? full;
         }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Send, X } from "lucide-react";
+import { RotateCcw, Send, X } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useFilesStore } from "@/stores/useFilesStore";
@@ -17,6 +17,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
   const typing = useChatStore((s) => s.typing);
   const setDraft = useChatStore((s) => s.setDraft);
   const send = useChatStore((s) => s.send);
+  const reset = useChatStore((s) => s.reset);
   const streaming = useChatStore((s) => s.streaming);
   const indexedCount = useFilesStore(
     (s) => s.files.filter((f) => f.status === "ingested").length,
@@ -37,6 +38,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
 
   const showSuggestions = messages.length === 1 && !typing;
   const canSend = draft.trim().length > 0 && !typing;
+  const canClear = messages.length > 1 && !typing;
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -55,6 +57,17 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
             grounded · {indexedCount} sources indexed
           </div>
         </div>
+        <button
+          type="button"
+          className="chat-head-close"
+          onClick={reset}
+          disabled={!canClear}
+          aria-label="Clear chat"
+          title="Clear chat"
+          style={{ marginRight: 6 }}
+        >
+          <RotateCcw size={13} strokeWidth={2.2} />
+        </button>
         <button
           type="button"
           className="chat-head-close"
