@@ -1,3 +1,4 @@
+import { MarkdownText } from "@/components/chatbot/MarkdownText";
 import type { ChatMessage } from "@/types/chat";
 
 interface MessageBubbleProps {
@@ -11,7 +12,13 @@ function truncate(s: string, max = 28): string {
 export function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <div className={`msg ${message.role}`}>
-      <div className="bubble">{message.text}</div>
+      <div className="bubble">
+        {message.role === "bot" ? (
+          <MarkdownText text={message.text} />
+        ) : (
+          message.text
+        )}
+      </div>
       {message.sources && message.sources.length > 0 && (
         <div className="msg-cite">
           {message.sources.map((s, i) =>

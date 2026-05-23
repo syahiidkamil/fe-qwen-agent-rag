@@ -4,6 +4,7 @@ import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { MessageBubble } from "@/components/chatbot/MessageBubble";
+import { MarkdownText } from "@/components/chatbot/MarkdownText";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
 
 interface ChatPanelProps {
@@ -85,7 +86,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
         {typing && (
           <div className="msg bot">
             <div className="bubble">
-              {streaming ? streaming : <TypingIndicator />}
+              {streaming ? <MarkdownText text={streaming} /> : <TypingIndicator />}
             </div>
           </div>
         )}

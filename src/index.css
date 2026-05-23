@@ -1736,6 +1736,53 @@ a { color: inherit; text-decoration: none; }
   border-bottom-left-radius: 4px;
   color: var(--ink);
 }
+/* Markdown rendering inside chat bubbles — compact spacing for chat context. */
+.markdown { display: flex; flex-direction: column; gap: 6px; }
+.markdown p { margin: 0; }
+.markdown ul, .markdown ol { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 2px; }
+.markdown li { margin: 0; }
+.markdown li > p { display: inline; }
+.markdown strong { font-weight: 600; }
+.markdown em { font-style: italic; }
+.markdown code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.06);
+  border: 1px solid var(--rule);
+}
+.markdown pre {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid var(--rule);
+  overflow-x: auto;
+  font-size: 12px;
+}
+.markdown pre code { background: none; border: none; padding: 0; font-size: inherit; }
+.markdown a { color: var(--teal-deep); text-decoration: underline; }
+.markdown a:hover { color: var(--ink); }
+.markdown blockquote {
+  margin: 0;
+  padding: 4px 10px;
+  border-left: 3px solid var(--rule);
+  color: var(--ink-2);
+}
+.markdown h1, .markdown h2, .markdown h3, .markdown h4 {
+  margin: 4px 0 2px; font-weight: 600; line-height: 1.3;
+}
+.markdown h1 { font-size: 16px; }
+.markdown h2 { font-size: 15px; }
+.markdown h3, .markdown h4 { font-size: 14px; }
+.markdown hr { border: 0; border-top: 1px solid var(--rule); margin: 6px 0; }
+.markdown table { border-collapse: collapse; font-size: 12px; }
+.markdown th, .markdown td { border: 1px solid var(--rule); padding: 4px 8px; }
+/* User bubble keeps plain text — but if we ever render markdown there, recolor links. */
+.msg.user .markdown a { color: #fff; }
+.msg.user .markdown code, .msg.user .markdown pre { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.18); color: #fff; }
+
 .msg-cite { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .cite {
   font-family: var(--mono);
