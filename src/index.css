@@ -1322,17 +1322,16 @@ a { color: inherit; text-decoration: none; }
 }
 .cms-preview-body {
   padding: 0;
-  max-height: calc(100vh - 220px);
-  overflow-y: auto;
   background: var(--bg);
-  scrollbar-width: thin;
+  height: calc(100vh - 220px);
+  overflow: hidden;
 }
-.cms-preview-frame {
-  transform: scale(0.62);
-  transform-origin: top left;
-  width: 161.29%;
-  height: 161.29%;
-  pointer-events: auto;
+.cms-preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: var(--paper);
 }
 
 /* ============================================================

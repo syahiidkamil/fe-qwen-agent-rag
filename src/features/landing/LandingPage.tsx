@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { LandingNav } from "@/features/landing/sections/LandingNav";
 import { HeroSection } from "@/features/landing/sections/HeroSection";
@@ -12,8 +13,27 @@ interface LandingPageProps {
   withChat?: boolean;
 }
 
+function isPreviewMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("preview");
+}
+
 export function LandingPage({ withChat = true }: LandingPageProps) {
   const config = useConfigStore((s) => s.config);
+  const preview = isPreviewMode();
+
+  // When embedded in the CMS preview iframe, rehydrate from localStorage on
+  // every parent config change so edits show up live.
+  useEffect(() => {
+    if (!preview) return;
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === "airanext:config:updated") {
+        useConfigStore.persist.rehydrate();
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [preview]);
 
   return (
     <>
@@ -28,7 +48,7 @@ export function LandingPage({ withChat = true }: LandingPageProps) {
         <FlowSection config={config} />
       </main>
       <LandingFooter config={config} />
-      {withChat && <ChatWidget />}
+      {withChat && !preview && <ChatWidget />}
     </>
   );
 }
