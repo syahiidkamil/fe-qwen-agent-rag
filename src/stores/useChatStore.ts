@@ -1,16 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+
+import { streamChat, type ChatStreamMessage, type SourceRef } from "@/services/ChatService";
 import type { ChatMessage } from "@/types/chat";
-import { fakeReply } from "@/lib/fake-reply";
-import { useFilesStore } from "@/stores/useFilesStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 
 interface ChatState {
+  sessionId: string | null;
   messages: ChatMessage[];
   draft: string;
   typing: boolean;
+  /** Token-by-token in-flight assistant message text. */
+  streaming: string;
+  /** Sources for the in-flight assistant message. */
+  pendingSources: SourceRef[];
   setDraft: (s: string) => void;
-  send: (text?: string) => void;
+  send: (text?: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -19,18 +24,34 @@ function welcomeMessage(): ChatMessage {
   return { id: "m0", role: "bot", text: welcome };
 }
 
+function sourcesToChat(refs: SourceRef[]): ChatMessage["sources"] {
+  // Dedupe by document_id; show as [doc-<short>] until we expose filenames via API.
+  const seen = new Set<string>();
+  const out: NonNullable<ChatMessage["sources"]> = [];
+  for (const r of refs) {
+    if (seen.has(r.document_id)) continue;
+    seen.add(r.document_id);
+    out.push({ id: r.document_id, name: `doc-${r.document_id.slice(0, 6)}` });
+  }
+  return out;
+}
+
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
+      sessionId: null,
       messages: [welcomeMessage()],
       draft: "",
       typing: false,
+      streaming: "",
+      pendingSources: [],
 
       setDraft: (s) => set({ draft: s }),
 
-      send: (text) => {
+      async send(text) {
         const content = (text ?? get().draft).trim();
-        if (!content) return;
+        if (!content || get().typing) return;
+
         const userMsg: ChatMessage = {
           id: `u${Date.now()}`,
           role: "user",
@@ -40,32 +61,84 @@ export const useChatStore = create<ChatState>()(
           messages: [...get().messages, userMsg],
           draft: "",
           typing: true,
+          streaming: "",
+          pendingSources: [],
         });
-        const files = useFilesStore.getState().files;
-        const { body, sources } = fakeReply(content, files);
-        setTimeout(() => {
-          const botMsg: ChatMessage = {
-            id: `b${Date.now()}`,
-            role: "bot",
-            text: body,
-            sources,
-          };
-          set({ messages: [...get().messages, botMsg], typing: false });
-        }, 700);
+
+        // Map UI message history to backend wire format. The widget's bot
+        // welcome is excluded from history (it's UI-only).
+        const wire: ChatStreamMessage[] = get()
+          .messages.filter((m) => m.id !== "m0")
+          .map((m) => ({
+            role: m.role === "user" ? "user" : "assistant",
+            content: m.text,
+          }));
+        wire.push({ role: "user", content });
+
+        try {
+          await streamChat(wire, get().sessionId, {
+            onSession: (id) => set({ sessionId: id }),
+            onSources: (refs) => set({ pendingSources: refs }),
+            onToken: (delta) => set((s) => ({ streaming: s.streaming + delta })),
+            onDone: (full) => {
+              const botMsg: ChatMessage = {
+                id: `b${Date.now()}`,
+                role: "bot",
+                text: full || get().streaming,
+                sources: sourcesToChat(get().pendingSources),
+              };
+              set({
+                messages: [...get().messages, botMsg],
+                typing: false,
+                streaming: "",
+                pendingSources: [],
+              });
+            },
+            onError: (err) => {
+              const botMsg: ChatMessage = {
+                id: `b${Date.now()}`,
+                role: "bot",
+                text: `Sorry — I couldn't reach the assistant (${err.message}).`,
+              };
+              set({
+                messages: [...get().messages, botMsg],
+                typing: false,
+                streaming: "",
+                pendingSources: [],
+              });
+            },
+          });
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Unknown error";
+          set({
+            messages: [
+              ...get().messages,
+              { id: `b${Date.now()}`, role: "bot", text: `Network error: ${msg}` },
+            ],
+            typing: false,
+            streaming: "",
+          });
+        }
       },
 
-      reset: () => set({ messages: [welcomeMessage()], draft: "", typing: false }),
+      reset: () =>
+        set({
+          sessionId: null,
+          messages: [welcomeMessage()],
+          draft: "",
+          typing: false,
+          streaming: "",
+          pendingSources: [],
+        }),
     }),
     {
-      name: "airanext.chat.v2",
+      name: "airanext.chat.v3",
       version: 1,
-      partialize: (s) => ({ messages: s.messages }),
+      partialize: (s) => ({ sessionId: s.sessionId, messages: s.messages }),
     },
   ),
 );
 
-// Refresh welcome message when widget config changes and we're still on the
-// initial welcome-only state (mirrors reference behavior).
 useConfigStore.subscribe((s, prev) => {
   if (s.config.widget.welcome === prev.config.widget.welcome) return;
   const { messages } = useChatStore.getState();

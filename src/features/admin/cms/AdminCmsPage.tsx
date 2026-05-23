@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Upload, Download, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useConfigStore } from "@/stores/useConfigStore";
@@ -34,7 +34,20 @@ export function AdminCmsPage() {
     resetConfig();
     toast("Reset to default");
   };
-  const onSave = () => toast("All changes saved");
+  const saveToBackend = useConfigStore((s) => s.saveToBackend);
+  const [saving, setSaving] = useState(false);
+  const onSave = async () => {
+    setSaving(true);
+    try {
+      await saveToBackend();
+      toast("All changes saved");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`Save failed: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <>
@@ -66,7 +79,7 @@ export function AdminCmsPage() {
           <button type="button" className="btn btn-ghost btn-sm" onClick={onReset}>
             Reset
           </button>
-          <button type="button" className="btn btn-teal btn-sm" onClick={onSave}>
+          <button type="button" className="btn btn-teal btn-sm" onClick={onSave} disabled={saving}>
             Save
             <Check size={12} strokeWidth={1.8} />
           </button>

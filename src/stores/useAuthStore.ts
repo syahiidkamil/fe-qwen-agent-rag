@@ -1,21 +1,48 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import type { Session } from "@supabase/supabase-js";
+
+import { supabase } from "@/lib/supabase";
 
 interface AuthState {
+  initialized: boolean;
   isAuthenticated: boolean;
   email: string | null;
-  login: (email: string) => void;
-  logout: () => void;
+  init: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      isAuthenticated: false,
-      email: null,
-      login: (email) => set({ isAuthenticated: true, email }),
-      logout: () => set({ isAuthenticated: false, email: null }),
-    }),
-    { name: "airanext.auth.v2", version: 1 },
-  ),
-);
+function applySession(set: (s: Partial<AuthState>) => void, session: Session | null) {
+  set({
+    isAuthenticated: !!session,
+    email: session?.user.email ?? null,
+  });
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  initialized: false,
+  isAuthenticated: false,
+  email: null,
+
+  async init() {
+    if (get().initialized) return;
+    const { data } = await supabase.auth.getSession();
+    applySession(set, data.session);
+    set({ initialized: true });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      applySession(set, session);
+    });
+  },
+
+  async login(email, password) {
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    applySession(set, data.session);
+  },
+
+  async logout() {
+    await supabase.auth.signOut();
+    applySession(set, null);
+  },
+}));

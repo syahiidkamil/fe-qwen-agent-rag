@@ -14,7 +14,7 @@ export function Dropzone() {
     e.preventDefault();
     setDrag(false);
     if (e.dataTransfer.files.length) {
-      addFiles(Array.from(e.dataTransfer.files));
+      void addFiles(Array.from(e.dataTransfer.files));
     }
   };
 
@@ -54,7 +54,7 @@ export function Dropzone() {
           hidden
           onChange={(e) => {
             if (e.target.files?.length) {
-              addFiles(Array.from(e.target.files));
+              void addFiles(Array.from(e.target.files));
               e.target.value = "";
             }
           }}

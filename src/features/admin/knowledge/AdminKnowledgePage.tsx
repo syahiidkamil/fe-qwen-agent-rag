@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { toast } from "sonner";
 import { useFilesStore } from "@/stores/useFilesStore";
@@ -11,7 +11,12 @@ export function AdminKnowledgePage() {
   const files = useFilesStore((s) => s.files);
   const addFiles = useFilesStore((s) => s.addFiles);
   const startIngest = useFilesStore((s) => s.startIngest);
+  const refresh = useFilesStore((s) => s.refresh);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | KbFileStatus>("all");
@@ -33,7 +38,7 @@ export function AdminKnowledgePage() {
       toast("Nothing to ingest");
       return;
     }
-    for (const p of pending) startIngest(p.id);
+    for (const p of pending) void startIngest(p.id);
     toast(
       `Ingesting ${pending.length} pending file${pending.length === 1 ? "" : "s"}`,
     );
@@ -71,7 +76,7 @@ export function AdminKnowledgePage() {
             hidden
             onChange={(e) => {
               if (e.target.files?.length) {
-                addFiles(Array.from(e.target.files));
+                void addFiles(Array.from(e.target.files));
                 e.target.value = "";
               }
             }}

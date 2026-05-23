@@ -20,6 +20,11 @@ function isPreviewMode(): boolean {
 
 export function LandingPage({ withChat = true }: LandingPageProps) {
   const config = useConfigStore((s) => s.config);
+  const loadFromBackend = useConfigStore((s) => s.loadFromBackend);
+  useEffect(() => {
+    void loadFromBackend();
+  }, [loadFromBackend]);
+
   const preview = isPreviewMode();
 
   // When embedded in the CMS preview iframe, rehydrate from localStorage on

@@ -17,6 +17,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
   const typing = useChatStore((s) => s.typing);
   const setDraft = useChatStore((s) => s.setDraft);
   const send = useChatStore((s) => s.send);
+  const streaming = useChatStore((s) => s.streaming);
   const indexedCount = useFilesStore(
     (s) => s.files.filter((f) => f.status === "ingested").length,
   );
@@ -40,7 +41,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (canSend) send();
+      if (canSend) void send();
     }
   };
 
@@ -71,7 +72,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
         {typing && (
           <div className="msg bot">
             <div className="bubble">
-              <TypingIndicator />
+              {streaming ? streaming : <TypingIndicator />}
             </div>
           </div>
         )}
@@ -85,7 +86,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
               type="button"
               key={i}
               className="suggest"
-              onClick={() => send(s)}
+              onClick={() => void send(s)}
             >
               {s}
             </button>
@@ -105,7 +106,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
         <button
           type="button"
           className="chat-send"
-          onClick={() => send()}
+          onClick={() => void send()}
           disabled={!canSend}
           aria-label="Send"
         >

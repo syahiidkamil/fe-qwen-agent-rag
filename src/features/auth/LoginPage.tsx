@@ -19,6 +19,13 @@ export function LoginPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const login = useAuthStore((s) => s.login);
   const [submitting, setSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const initialized = useAuthStore((s) => s.initialized);
+  const initAuth = useAuthStore((s) => s.init);
+
+  useEffect(() => {
+    if (!initialized) void initAuth();
+  }, [initialized, initAuth]);
 
   useEffect(() => {
     if (isAuthenticated) navigate("/admin/cms", { replace: true });
@@ -30,19 +37,21 @@ export function LoginPage() {
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      email: "ops@airanext.id",
-      password: "demo123",
-      remember: true,
-    },
+    defaultValues: { email: "", password: "", remember: true },
   });
 
-  const onSubmit = (data: LoginValues) => {
+  const onSubmit = async (data: LoginValues) => {
     setSubmitting(true);
-    setTimeout(() => {
-      login(data.email);
+    setAuthError(null);
+    try {
+      await login(data.email, data.password);
       navigate("/admin/cms", { replace: true });
-    }, 700);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Sign-in failed";
+      setAuthError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -219,6 +228,11 @@ export function LoginPage() {
             </label>
           </div>
 
+                    {authError && (
+            <div className="field-error" style={{ marginBottom: 12 }}>
+              {authError}
+            </div>
+          )}
           <button
             type="submit"
             className="btn btn-teal"
@@ -234,8 +248,8 @@ export function LoginPage() {
           </button>
 
           <div className="login-demo">
-            <b>Demo</b>
-            <span>Any credentials work. Click sign in to enter admin.</span>
+            <b>Staff access</b>
+            <span>Use the Supabase admin email/password set up in your project.</span>
           </div>
         </form>
 

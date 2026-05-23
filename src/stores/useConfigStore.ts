@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { LandingConfig, PresetId } from "@/types/config";
 import { DEFAULT_CONFIG, PRESETS } from "@/lib/mock-data";
+import { ConfigService } from "@/services/ConfigService";
 
 type DeepPartial<T> = T extends object
   ? { [K in keyof T]?: DeepPartial<T[K]> }
@@ -15,6 +16,8 @@ interface ConfigState {
   loadPreset: (id: PresetId) => void;
   exportConfig: () => void;
   importConfig: (file: File) => Promise<void>;
+  loadFromBackend: () => Promise<void>;
+  saveToBackend: () => Promise<void>;
 }
 
 const NESTED_KEYS = [
@@ -37,13 +40,13 @@ function mergeConfig(
   for (const k of NESTED_KEYS) {
     if (patch[k]) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      out[k] = { ...(base[k] as any), ...(patch[k] as any) };
+      out[k] = { ...(base[k] as any), ...(patch[k] as any) } as any;
     }
   }
   if (patch.hero?.card && base.hero?.card) {
     out.hero = {
       ...out.hero,
-      card: { ...base.hero.card, ...patch.hero.card },
+      card: { ...base.hero.card, ...patch.hero.card } as LandingConfig["hero"]["card"],
     };
   }
   return out;
@@ -107,6 +110,22 @@ export const useConfigStore = create<ConfigState>()(
           r.onerror = () => reject(new Error("File read error"));
           r.readAsText(file);
         }),
+      loadFromBackend: async () => {
+        try {
+          const { config } = await ConfigService.get();
+          if (config) {
+            applyTheme(config);
+            set({ config });
+          }
+        } catch (err) {
+          // Network/backend unavailable — keep whatever's in local state.
+          // eslint-disable-next-line no-console
+          console.warn("ConfigService.get failed; using local state:", err);
+        }
+      },
+      saveToBackend: async () => {
+        await ConfigService.save(get().config);
+      },
     }),
     {
       name: "airanext.config.v2",
