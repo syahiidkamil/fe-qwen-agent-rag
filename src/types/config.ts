@@ -89,6 +89,8 @@ export interface WidgetConfig {
   suggestions: string[];
 }
 
+export type ChatMode = "public" | "internal";
+
 export interface LandingConfig {
   brand: string;
   tagline: string;
@@ -103,6 +105,11 @@ export interface LandingConfig {
   layout: LayoutFlags;
   theme: { accent: string };
   widget: WidgetConfig;
+  /** Whether the public landing chat widget is open to anonymous visitors
+   *  ("public") or only to signed-in users ("internal"). Toggled by
+   *  super-admin in the Landing CMS. Defaults to "public" for backwards-
+   *  compat with rows that pre-date the field. */
+  chat_mode: ChatMode;
 }
 
 export type PresetId = "airanext" | "pulse" | "foyer";

@@ -4,11 +4,22 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
 import { AdminKnowledgePage } from "@/features/admin/knowledge/AdminKnowledgePage";
-import { RoleGuard } from "@/routes/RoleGuard";
+import { RoleGuard, defaultRouteForRole } from "@/routes/RoleGuard";
+import { useAuthStore } from "@/stores/useAuthStore";
+
+/** Sends a logged-in admin to /admin/knowledge and a super-admin to /admin/cms.
+ *  Used on /admin index so direct visits don't dead-end on a route the
+ *  current role can't reach. */
+function AdminIndexRedirect() {
+  const role = useAuthStore((s) => s.role);
+  const to = role === "super_admin" ? "/admin/cms" : defaultRouteForRole(role);
+  return <Navigate to={to} replace />;
+}
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/login", element: <LoginPage /> },
+  // Admin shell — admin AND super_admin can enter.
   {
     element: <RoleGuard allowedRoles={["admin", "super_admin"]} />,
     children: [
@@ -16,9 +27,13 @@ const router = createBrowserRouter([
         path: "/admin",
         element: <AdminLayout />,
         children: [
-          { index: true, element: <Navigate to="/admin/cms" replace /> },
-          { path: "cms", element: <AdminCmsPage /> },
+          { index: true, element: <AdminIndexRedirect /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
+          // Landing CMS (brand presets + chat-mode toggle) is super-admin only.
+          {
+            element: <RoleGuard allowedRoles={["super_admin"]} />,
+            children: [{ path: "cms", element: <AdminCmsPage /> }],
+          },
         ],
       },
     ],

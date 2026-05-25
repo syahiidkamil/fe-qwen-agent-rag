@@ -160,6 +160,7 @@ export const PRESET_AIRANEXT: LandingConfig = {
       "Who are your hiring partners?",
     ],
   },
+  chat_mode: "public",
 };
 
 export const PRESET_PULSE: LandingConfig = {
@@ -321,6 +322,7 @@ export const PRESET_PULSE: LandingConfig = {
       "What's in the free trial?",
     ],
   },
+  chat_mode: "public",
 };
 
 export const PRESET_FOYER: LandingConfig = {
@@ -484,6 +486,7 @@ export const PRESET_FOYER: LandingConfig = {
       "Is there a code of conduct?",
     ],
   },
+  chat_mode: "public",
 };
 
 export const PRESETS: Record<PresetId, PresetEntry> = {

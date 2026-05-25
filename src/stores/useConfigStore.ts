@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { LandingConfig, PresetId } from "@/types/config";
+import type { ChatMode, LandingConfig, PresetId } from "@/types/config";
 import { DEFAULT_CONFIG, PRESETS } from "@/lib/mock-data";
 import { ConfigService } from "@/services/ConfigService";
 
@@ -10,6 +10,10 @@ type DeepPartial<T> = T extends object
 
 interface ConfigState {
   config: LandingConfig;
+  /** The chat_mode last persisted to the backend. `null` before first load.
+   *  Used by the CMS form to show "Currently: …" + dashed border when the
+   *  in-memory radio differs from what's actually saved. */
+  lastSavedChatMode: ChatMode | null;
   setConfig: (next: LandingConfig) => void;
   patchConfig: (patch: DeepPartial<LandingConfig>) => void;
   resetConfig: () => void;
@@ -62,6 +66,7 @@ export const useConfigStore = create<ConfigState>()(
   persist(
     (set, get) => ({
       config: DEFAULT_CONFIG,
+      lastSavedChatMode: null,
       setConfig: (next) => {
         applyTheme(next);
         set({ config: next });
@@ -115,7 +120,10 @@ export const useConfigStore = create<ConfigState>()(
           const { config } = await ConfigService.get();
           if (config) {
             applyTheme(config);
-            set({ config });
+            set({
+              config,
+              lastSavedChatMode: config.chat_mode ?? "public",
+            });
           }
         } catch (err) {
           // Network/backend unavailable — keep whatever's in local state.
@@ -124,7 +132,9 @@ export const useConfigStore = create<ConfigState>()(
         }
       },
       saveToBackend: async () => {
-        await ConfigService.save(get().config);
+        const cfg = get().config;
+        await ConfigService.save(cfg);
+        set({ lastSavedChatMode: cfg.chat_mode ?? "public" });
       },
     }),
     {

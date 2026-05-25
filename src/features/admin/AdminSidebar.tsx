@@ -9,8 +9,10 @@ export function AdminSidebar() {
   const navigate = useNavigate();
   const config = useConfigStore((s) => s.config);
   const email = useAuthStore((s) => s.email) ?? "ops@airanext.id";
+  const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
   const totalFiles = useFilesStore((s) => s.files.length);
+  const isSuperAdmin = role === "super_admin";
 
   const handleLogout = () => {
     logout();
@@ -37,14 +39,16 @@ export function AdminSidebar() {
       </Link>
 
       <div className="admin-side-section">Manage</div>
-      <Link
-        to="/admin/cms"
-        className="admin-side-link"
-        data-active={isActive("/admin/cms")}
-      >
-        <FileText className="sl-icon" />
-        <span>Landing CMS</span>
-      </Link>
+      {isSuperAdmin && (
+        <Link
+          to="/admin/cms"
+          className="admin-side-link"
+          data-active={isActive("/admin/cms")}
+        >
+          <FileText className="sl-icon" />
+          <span>Landing CMS</span>
+        </Link>
+      )}
       <Link
         to="/admin/knowledge"
         className="admin-side-link"

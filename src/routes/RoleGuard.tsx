@@ -13,7 +13,8 @@ interface RoleGuardProps {
  */
 export function defaultRouteForRole(role: Role | null): string {
   if (role === "user") return "/workspace";
-  if (role === "admin" || role === "super_admin") return "/admin/cms";
+  if (role === "super_admin") return "/admin/cms";
+  if (role === "admin") return "/admin/knowledge";
   return "/login";
 }
 

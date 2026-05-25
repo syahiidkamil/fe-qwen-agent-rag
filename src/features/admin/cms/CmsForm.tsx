@@ -14,6 +14,9 @@ const ACCENT_OPTIONS = [
 export function CmsForm() {
   const config = useConfigStore((s) => s.config);
   const patchConfig = useConfigStore((s) => s.patchConfig);
+  const lastSavedChatMode = useConfigStore((s) => s.lastSavedChatMode);
+  const chatModeDirty =
+    lastSavedChatMode !== null && config.chat_mode !== lastSavedChatMode;
 
   const patchHero = (sub: Partial<LandingConfig["hero"]>) =>
     patchConfig({ hero: sub });
@@ -76,6 +79,109 @@ export function CmsForm() {
 
   return (
     <>
+      <CollapsibleSection ix="✱" title="Chat mode" defaultOpen>
+        <p
+          style={{
+            color: "var(--ink-2)",
+            fontSize: 13,
+            marginBottom: 12,
+            lineHeight: 1.5,
+          }}
+        >
+          Controls whether the public landing chat widget is open to anonymous
+          visitors, or only to signed-in team members.
+        </p>
+        <div style={{ display: "grid", gap: 8, marginBottom: 14 }}>
+          {([
+            {
+              value: "public",
+              title: "Public",
+              hint: "Anyone can chat with Aira from the marketing landing page.",
+            },
+            {
+              value: "internal",
+              title: "Internal",
+              hint: 'Anonymous visitors see a "Sign in to chat" prompt. Signed-in users (any role) chat normally.',
+            },
+          ] as const).map((opt) => (
+            <label
+              key={opt.value}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr",
+                gap: 10,
+                padding: "10px 12px",
+                border:
+                  config.chat_mode === opt.value
+                    ? "1px solid var(--teal)"
+                    : "1px solid var(--line)",
+                borderRadius: 8,
+                cursor: "pointer",
+                background:
+                  config.chat_mode === opt.value
+                    ? "rgba(31, 199, 174, 0.06)"
+                    : "transparent",
+              }}
+            >
+              <input
+                type="radio"
+                name="chat_mode"
+                value={opt.value}
+                checked={config.chat_mode === opt.value}
+                onChange={() => patchConfig({ chat_mode: opt.value })}
+                style={{ marginTop: 3, accentColor: "var(--teal)" }}
+              />
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{opt.title}</div>
+                <div style={{ color: "var(--ink-2)", fontSize: 12.5, marginTop: 2 }}>
+                  {opt.hint}
+                </div>
+              </div>
+            </label>
+          ))}
+        </div>
+        {lastSavedChatMode !== null && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 10px",
+              borderRadius: 9999,
+              fontSize: 12,
+              fontFamily: "var(--mono)",
+              color: "var(--ink-2)",
+              background: "var(--surface-2, #f6f7f8)",
+              border: chatModeDirty
+                ? "1px dashed var(--amber, #D77F1F)"
+                : "1px solid var(--line)",
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 9999,
+                background:
+                  lastSavedChatMode === "internal"
+                    ? "var(--amber, #D77F1F)"
+                    : "var(--teal)",
+                display: "inline-block",
+              }}
+            />
+            Currently saved:{" "}
+            <b style={{ color: "var(--ink)" }}>
+              {lastSavedChatMode === "public" ? "Public" : "Internal"}
+            </b>
+            {chatModeDirty && (
+              <span style={{ color: "var(--amber, #D77F1F)", marginLeft: 4 }}>
+                · unsaved change
+              </span>
+            )}
+          </div>
+        )}
+      </CollapsibleSection>
+
       <CollapsibleSection ix="01" title="Identity" defaultOpen>
         <label className="field">
           <div className="field-label">
