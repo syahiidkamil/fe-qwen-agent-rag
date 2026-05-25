@@ -4,6 +4,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
 import { AdminKnowledgePage } from "@/features/admin/knowledge/AdminKnowledgePage";
+import { WorkspacePage } from "@/features/workspace/WorkspacePage";
 import { RoleGuard, defaultRouteForRole } from "@/routes/RoleGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -37,6 +38,13 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  // Internal workspace — any signed-in role can use it. CS / sales /
+  // support team lands here after sign-in; admins can navigate here
+  // directly to see what their team's surface looks like.
+  {
+    element: <RoleGuard allowedRoles={["user", "admin", "super_admin"]} />,
+    children: [{ path: "/workspace", element: <WorkspacePage /> }],
   },
   { path: "*", element: <NotFound /> },
 ]);
