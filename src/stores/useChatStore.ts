@@ -13,9 +13,14 @@ interface ChatState {
   streaming: string;
   /** Sources for the in-flight assistant message. */
   pendingSources: SourceRef[];
+  /** True once the BE has refused a send with INTERNAL_MODE_REQUIRES_AUTH.
+   *  The widget shows the "Sign in to chat" gate over the existing
+   *  conversation (greyed) until the user signs in or resets. */
+  gated: boolean;
   setDraft: (s: string) => void;
   send: (text?: string) => Promise<void>;
   reset: () => void;
+  clearGate: () => void;
 }
 
 function welcomeMessage(): ChatMessage {
@@ -50,6 +55,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   typing: false,
   streaming: "",
   pendingSources: [],
+  gated: false,
 
   setDraft: (s) => set({ draft: s }),
 
@@ -89,6 +95,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
         onToken: (delta) => set((s) => ({ streaming: s.streaming + delta })),
         onServerError: (msg) => {
           serverError = msg;
+        },
+        onAuthRequired: () => {
+          // BE refused because chat_mode is internal and we're anonymous.
+          // Drop the in-flight user turn back into draft so the visitor
+          // can resend after signing in; flip into gated state to render
+          // the "Sign in to chat" card.
+          set((s) => ({
+            messages: s.messages.filter((m) => m.id !== userMsg.id),
+            draft: content,
+            typing: false,
+            streaming: "",
+            pendingSources: [],
+            gated: true,
+          }));
         },
         onDone: (full) => {
           const fallback = serverError ? `⚠ ${serverError}` : full || get().streaming;
@@ -140,7 +160,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
       typing: false,
       streaming: "",
       pendingSources: [],
+      gated: false,
     }),
+
+  clearGate: () => set({ gated: false }),
 }));
 
 useConfigStore.subscribe((s, prev) => {

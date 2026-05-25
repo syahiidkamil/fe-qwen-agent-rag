@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
-import { RotateCcw, Send, X } from "lucide-react";
+import { Link } from "react-router";
+import { Lock, RotateCcw, Send, X } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useFilesStore } from "@/stores/useFilesStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { MessageBubble } from "@/components/chatbot/MessageBubble";
 import { MarkdownText } from "@/components/chatbot/MarkdownText";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
@@ -13,6 +15,8 @@ interface ChatPanelProps {
 
 export function ChatPanel({ onClose }: ChatPanelProps) {
   const widget = useConfigStore((s) => s.config.widget);
+  const chatMode = useConfigStore((s) => s.config.chat_mode);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const messages = useChatStore((s) => s.messages);
   const draft = useChatStore((s) => s.draft);
   const typing = useChatStore((s) => s.typing);
@@ -20,9 +24,16 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
   const send = useChatStore((s) => s.send);
   const reset = useChatStore((s) => s.reset);
   const streaming = useChatStore((s) => s.streaming);
+  const gated = useChatStore((s) => s.gated);
   const indexedCount = useFilesStore(
     (s) => s.files.filter((f) => f.status === "ingested").length,
   );
+
+  // Show the "Sign in to chat" card when chat_mode is internal and we're
+  // anonymous, OR when a previous send got blocked by the BE 401 gate.
+  // Authenticated users (any role) always see the regular input.
+  const showGate =
+    !isAuthenticated && (gated || chatMode === "internal");
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,7 +60,12 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
   };
 
   return (
-    <div className="chat-panel" role="dialog" aria-label="Chat with assistant">
+    <div
+      className="chat-panel"
+      role="dialog"
+      aria-label="Chat with assistant"
+      data-gated={showGate ? "true" : undefined}
+    >
       <div className="chat-head">
         <div className="chat-avatar">{widget.initial}</div>
         <div className="chat-head-text">
@@ -79,7 +95,11 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
         </button>
       </div>
 
-      <div className="chat-body" ref={bodyRef}>
+      <div
+        className="chat-body"
+        ref={bodyRef}
+        style={showGate && messages.length > 1 ? { opacity: 0.55 } : undefined}
+      >
         {messages.map((m) => (
           <MessageBubble key={m.id} message={m} />
         ))}
@@ -92,41 +112,92 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
         )}
       </div>
 
-      {showSuggestions && widget.suggestions.length > 0 && (
-        <div className="chat-suggestions">
-          <div className="chat-suggestions-label">Try asking</div>
-          {widget.suggestions.slice(0, 4).map((s, i) => (
+      {showGate ? (
+        <div
+          style={{
+            padding: "16px 14px",
+            borderTop: "1px solid var(--line)",
+            background: "var(--surface-2, #f6f7f8)",
+            display: "grid",
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontWeight: 600,
+              fontSize: 14,
+              color: "var(--ink)",
+            }}
+          >
+            <Lock size={14} strokeWidth={2} />
+            Sign in to chat
+          </div>
+          <p
+            style={{
+              color: "var(--ink-2)",
+              fontSize: 13,
+              lineHeight: 1.45,
+              margin: 0,
+            }}
+          >
+            {widget.name} is currently only available to signed-in team
+            members. Sign in to continue the conversation.
+          </p>
+          <Link
+            to="/login"
+            className="btn btn-teal"
+            style={{
+              justifyContent: "center",
+              padding: "10px 16px",
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            Sign in →
+          </Link>
+        </div>
+      ) : (
+        <>
+          {showSuggestions && widget.suggestions.length > 0 && (
+            <div className="chat-suggestions">
+              <div className="chat-suggestions-label">Try asking</div>
+              {widget.suggestions.slice(0, 4).map((s, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  className="suggest"
+                  onClick={() => void send(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="chat-input">
+            <textarea
+              ref={textareaRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={onKey}
+              placeholder={`Ask anything about ${widget.name}…`}
+              rows={1}
+            />
             <button
               type="button"
-              key={i}
-              className="suggest"
-              onClick={() => void send(s)}
+              className="chat-send"
+              onClick={() => void send()}
+              disabled={!canSend}
+              aria-label="Send"
             >
-              {s}
+              <Send size={14} strokeWidth={2} />
             </button>
-          ))}
-        </div>
+          </div>
+        </>
       )}
-
-      <div className="chat-input">
-        <textarea
-          ref={textareaRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKey}
-          placeholder={`Ask anything about ${widget.name}…`}
-          rows={1}
-        />
-        <button
-          type="button"
-          className="chat-send"
-          onClick={() => void send()}
-          disabled={!canSend}
-          aria-label="Send"
-        >
-          <Send size={14} strokeWidth={2} />
-        </button>
-      </div>
     </div>
   );
 }

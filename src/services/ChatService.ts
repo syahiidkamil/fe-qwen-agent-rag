@@ -20,6 +20,10 @@ export interface StreamCallbacks {
   onToken: (delta: string) => void;
   /** Server-side error event (e.g. LLM API failure) inside the SSE stream. */
   onServerError?: (message: string) => void;
+  /** Fired when the chat endpoint refuses the request because chat_mode
+   *  is "internal" and the visitor is anonymous. The widget should swap
+   *  to the "Sign in to chat" gate. */
+  onAuthRequired?: () => void;
   onDone: (full: string) => void;
   onError: (err: Error) => void;
 }
@@ -50,7 +54,23 @@ export async function streamChat(
   });
 
   if (!resp.ok || !resp.body) {
-    cb.onError(new Error(`HTTP ${resp.status}: ${await resp.text().catch(() => "")}`));
+    const bodyText = await resp.text().catch(() => "");
+    if (resp.status === 401) {
+      // Try to identify the chat-mode gate specifically so the widget can
+      // render the "Sign in to chat" card. Any other 401 (e.g. expired
+      // token on an authenticated session) falls through to onError.
+      try {
+        const parsed = JSON.parse(bodyText);
+        const code = parsed?.detail?.error?.code;
+        if (code === "INTERNAL_MODE_REQUIRES_AUTH") {
+          cb.onAuthRequired?.();
+          return;
+        }
+      } catch {
+        // not JSON — fall through
+      }
+    }
+    cb.onError(new Error(`HTTP ${resp.status}: ${bodyText}`));
     return;
   }
 
