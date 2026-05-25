@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { defaultRouteForRole } from "@/routes/RoleGuard";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
 
 const schema = z.object({
@@ -16,20 +17,38 @@ type LoginValues = z.infer<typeof schema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const role = useAuthStore((s) => s.role);
   const login = useAuthStore((s) => s.login);
+  const logout = useAuthStore((s) => s.logout);
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const initialized = useAuthStore((s) => s.initialized);
   const initAuth = useAuthStore((s) => s.init);
 
+  const misconfiguredError = useMemo(() => {
+    return searchParams.get("error") === "missing_role"
+      ? "This account needs setup. Contact your administrator."
+      : null;
+  }, [searchParams]);
+
   useEffect(() => {
     if (!initialized) void initAuth();
   }, [initialized, initAuth]);
 
+  // Once the session is hydrated and we know the role, redirect or
+  // sign out (for a role we can't route to).
   useEffect(() => {
-    if (isAuthenticated) navigate("/admin/cms", { replace: true });
-  }, [isAuthenticated, navigate]);
+    if (!initialized || !isAuthenticated) return;
+    if (role === null) {
+      void logout().then(() => {
+        navigate("/login?error=missing_role", { replace: true });
+      });
+      return;
+    }
+    navigate(defaultRouteForRole(role), { replace: true });
+  }, [initialized, isAuthenticated, role, navigate, logout]);
 
   const {
     register,
@@ -45,7 +64,9 @@ export function LoginPage() {
     setAuthError(null);
     try {
       await login(data.email, data.password);
-      navigate("/admin/cms", { replace: true });
+      // Don't navigate here — the auth-state effect above reads the
+      // hydrated role and routes by it. Avoids a flash to /admin/cms
+      // for a `user`-role sign-in.
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Sign-in failed";
       setAuthError(msg);
@@ -228,9 +249,9 @@ export function LoginPage() {
             </label>
           </div>
 
-                    {authError && (
+                    {(authError || misconfiguredError) && (
             <div className="field-error" style={{ marginBottom: 12 }}>
-              {authError}
+              {authError ?? misconfiguredError}
             </div>
           )}
           <button

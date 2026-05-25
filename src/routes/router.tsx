@@ -4,13 +4,13 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
 import { AdminKnowledgePage } from "@/features/admin/knowledge/AdminKnowledgePage";
-import { ProtectedRoute } from "@/routes/ProtectedRoute";
+import { RoleGuard } from "@/routes/RoleGuard";
 
 const router = createBrowserRouter([
   { path: "/", element: <LandingPage /> },
   { path: "/login", element: <LoginPage /> },
   {
-    element: <ProtectedRoute />,
+    element: <RoleGuard allowedRoles={["admin", "super_admin"]} />,
     children: [
       {
         path: "/admin",

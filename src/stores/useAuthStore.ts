@@ -3,19 +3,34 @@ import type { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/lib/supabase";
 
+export const ROLES = ["super_admin", "admin", "user"] as const;
+export type Role = (typeof ROLES)[number];
+
+function extractRole(session: Session | null): Role | null {
+  const value = session?.user?.user_metadata?.role;
+  return typeof value === "string" && (ROLES as readonly string[]).includes(value)
+    ? (value as Role)
+    : null;
+}
+
 interface AuthState {
   initialized: boolean;
   isAuthenticated: boolean;
   email: string | null;
+  role: Role | null;
   init: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-function applySession(set: (s: Partial<AuthState>) => void, session: Session | null) {
+function applySession(
+  set: (s: Partial<AuthState>) => void,
+  session: Session | null,
+) {
   set({
     isAuthenticated: !!session,
     email: session?.user.email ?? null,
+    role: extractRole(session),
   });
 }
 
@@ -23,6 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
   isAuthenticated: false,
   email: null,
+  role: null,
 
   async init() {
     if (get().initialized) return;
