@@ -77,4 +77,12 @@ export const DocumentService = {
     );
     return toKbFile(data.data);
   },
+
+  /** Fetch a short-lived signed URL the browser can open in a new tab. */
+  async getViewUrl(id: string): Promise<string> {
+    const { data } = await api.get<{ data: { url: string; filename: string } }>(
+      `/api/documents/${id}/view-url`,
+    );
+    return data.data.url;
+  },
 };

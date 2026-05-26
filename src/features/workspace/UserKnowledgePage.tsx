@@ -12,6 +12,22 @@ import Fuse from "fuse.js";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
 import { fmtBytes } from "@/lib/format";
+import { DocumentService } from "@/services/DocumentService";
+import { toast } from "sonner";
+
+async function openDocument(id: string, name: string) {
+  // Open the tab synchronously so popup blockers treat it as user-initiated.
+  const tab = window.open("about:blank", "_blank", "noopener");
+  try {
+    const url = await DocumentService.getViewUrl(id);
+    if (tab) tab.location.href = url;
+    else window.open(url, "_blank", "noopener");
+  } catch (err) {
+    if (tab) tab.close();
+    const msg = err instanceof Error ? err.message : `Could not open ${name}`;
+    toast.error(msg);
+  }
+}
 
 /**
  * Read-only knowledge-base browser for the user role.
@@ -369,7 +385,14 @@ export function UserKnowledgePage() {
                     <div className="file-cell">
                       <FileIcon type={f.type} />
                       <div>
-                        <div className="file-name">{f.name}</div>
+                        <button
+                          type="button"
+                          className="file-name file-name-link"
+                          onClick={() => void openDocument(f.id, f.name)}
+                          title={`Open "${f.name}" in a new tab`}
+                        >
+                          {f.name}
+                        </button>
                         <div className="file-sub">embedded · {f.chunks} chunks</div>
                       </div>
                     </div>

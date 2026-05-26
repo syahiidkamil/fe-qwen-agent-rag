@@ -1544,6 +1544,29 @@ a { color: inherit; text-decoration: none; }
 .file-icon[data-type="txt"]  { color: var(--muted); }
 
 .file-name { font-weight: 500; letter-spacing: -0.005em; }
+button.file-name-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color .12s ease, text-decoration-color .12s ease;
+  text-underline-offset: 3px;
+}
+button.file-name-link:hover {
+  color: var(--teal-deep);
+  text-decoration: underline;
+  text-decoration-color: var(--teal-deep);
+}
+button.file-name-link:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 .file-sub {
   font-family: var(--mono);
   font-size: 10.5px;

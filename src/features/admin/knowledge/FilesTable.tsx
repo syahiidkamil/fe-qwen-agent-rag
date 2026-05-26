@@ -5,7 +5,24 @@ import type { KbFile } from "@/types/file";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
 import { fmtBytes } from "@/lib/format";
+import { DocumentService } from "@/services/DocumentService";
 import { EditDocumentDialog } from "@/features/admin/knowledge/EditDocumentDialog";
+
+async function openDocument(file: KbFile) {
+  // Open the tab synchronously so the browser counts it as user-initiated;
+  // navigate it to the signed URL once the API call returns. If we awaited
+  // first, Safari/Firefox would block the window.open() as a popup.
+  const tab = window.open("about:blank", "_blank", "noopener");
+  try {
+    const url = await DocumentService.getViewUrl(file.id);
+    if (tab) tab.location.href = url;
+    else window.open(url, "_blank", "noopener");
+  } catch (err) {
+    if (tab) tab.close();
+    const msg = err instanceof Error ? err.message : "Could not open document";
+    toast.error(msg);
+  }
+}
 
 interface FilesTableProps {
   files: KbFile[];
@@ -88,7 +105,18 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
         <div className="file-cell">
           <FileIcon type={f.type} />
           <div>
-            <div className="file-name">{f.name}</div>
+            {f.status === "ingested" || f.status === "uploaded" ? (
+              <button
+                type="button"
+                className="file-name file-name-link"
+                onClick={() => void openDocument(f)}
+                title={`Open "${f.name}" in a new tab`}
+              >
+                {f.name}
+              </button>
+            ) : (
+              <div className="file-name">{f.name}</div>
+            )}
             {f.error && (
               <div className="file-sub" style={{ color: "var(--red)" }}>
                 {f.error}
