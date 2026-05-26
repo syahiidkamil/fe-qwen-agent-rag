@@ -64,4 +64,12 @@ export const DocumentService = {
     );
     return toKbFile(data.data);
   },
+
+  async rename(id: string, filename: string): Promise<KbFile> {
+    const { data } = await api.patch<{ data: BackendDoc }>(
+      `/api/documents/${id}`,
+      { filename },
+    );
+    return toKbFile(data.data);
+  },
 };

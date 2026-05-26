@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { toast } from "sonner";
-import { Check, RotateCcw, Trash2 } from "lucide-react";
+import { Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import type { KbFile } from "@/types/file";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
 import { fmtBytes } from "@/lib/format";
+import { RenameDialog } from "@/features/admin/knowledge/RenameDialog";
 
 interface FilesTableProps {
   files: KbFile[];
@@ -14,6 +16,7 @@ export function FilesTable({ files, filterActive }: FilesTableProps) {
   const startIngest = useFilesStore((s) => s.startIngest);
   const retryIngest = useFilesStore((s) => s.retryIngest);
   const removeFile = useFilesStore((s) => s.removeFile);
+  const [renameTarget, setRenameTarget] = useState<KbFile | null>(null);
 
   if (files.length === 0) {
     return (
@@ -54,10 +57,17 @@ export function FilesTable({ files, filterActive }: FilesTableProps) {
                 removeFile(f.id);
                 toast(`Removed ${f.name}`);
               }}
+              onRename={() => setRenameTarget(f)}
             />
           ))}
         </tbody>
       </table>
+      {renameTarget && (
+        <RenameDialog
+          file={renameTarget}
+          onClose={() => setRenameTarget(null)}
+        />
+      )}
     </div>
   );
 }
@@ -67,9 +77,10 @@ interface FileRowProps {
   onIngest: () => void;
   onRetry: () => void;
   onRemove: () => void;
+  onRename: () => void;
 }
 
-function FileRow({ file: f, onIngest, onRetry, onRemove }: FileRowProps) {
+function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProps) {
   return (
     <tr>
       <td>
@@ -165,6 +176,15 @@ function FileRow({ file: f, onIngest, onRetry, onRemove }: FileRowProps) {
               Re-ingest
             </button>
           )}
+          <button
+            type="button"
+            className="row-act"
+            onClick={onRename}
+            title="Rename"
+            aria-label="Rename"
+          >
+            <Pencil size={11} strokeWidth={1.5} />
+          </button>
           <button
             type="button"
             className="row-act row-act-danger"

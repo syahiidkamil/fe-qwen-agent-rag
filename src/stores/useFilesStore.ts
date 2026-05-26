@@ -15,6 +15,7 @@ interface FilesState {
   removeFile: (id: string) => Promise<void>;
   startIngest: (id: string) => Promise<void>;
   retryIngest: (id: string) => Promise<void>;
+  rename: (id: string, filename: string) => Promise<void>;
 }
 
 let pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -105,5 +106,30 @@ export const useFilesStore = create<FilesState>((set, get) => ({
 
   async retryIngest(id) {
     return get().startIngest(id);
+  },
+
+  async rename(id, filename) {
+    const trimmed = filename.trim();
+    if (!trimmed) {
+      toast.error("Filename cannot be empty");
+      return;
+    }
+    // Optimistic update — flip the row's name immediately, revert on error.
+    const previous = get().files;
+    const optimistic = previous.map((f) =>
+      f.id === id ? { ...f, name: trimmed } : f,
+    );
+    set({ files: optimistic });
+    try {
+      const updated = await DocumentService.rename(id, trimmed);
+      set((s) => ({
+        files: s.files.map((f) => (f.id === id ? updated : f)),
+      }));
+      toast(`Renamed to ${updated.name}`);
+    } catch (err) {
+      set({ files: previous });
+      toast.error(`Rename failed: ${describeError(err)}`);
+      throw err;
+    }
   },
 }));
