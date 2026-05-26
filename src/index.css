@@ -2163,8 +2163,17 @@ a.cite:hover .ix { color: var(--teal-deep); }
   display: none;
 }
 .is-collapsed .admin-side-link {
+  /* `align-items: center` on the aside otherwise shrinks the link to
+     fit just the icon (~16px wide), which combined with 9px vertical
+     padding and the 8px border-radius makes the active background
+     render as a tall vertical pill. Fix the link to a 40x40 rounded
+     square so the active highlight reads as a clean tile. */
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 2px auto;
   justify-content: center;
-  padding: 9px 0;
+  border-radius: 10px;
 }
 .is-collapsed .admin-side-link .sl-icon {
   margin: 0;
@@ -2172,6 +2181,12 @@ a.cite:hover .ix { color: var(--teal-deep); }
 .is-collapsed .admin-side-logout {
   justify-content: center;
   padding: 12px 0;
+}
+.is-collapsed .admin-side-logout .sl-icon {
+  /* The optical-centering offset only makes sense when "Sign out"
+     text is visible. In collapsed mode the text is hidden, so reset
+     the nudge or the icon sits off-center. */
+  margin-left: 0;
 }
 
 /* Toggle button — sits in the sidebar header row next to the brand */
