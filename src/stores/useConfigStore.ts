@@ -150,6 +150,14 @@ export const useConfigStore = create<ConfigState>()(
     {
       name: "airanext.config.v2",
       version: 1,
+      // Persist only the durable bits. `loadStatus` is a per-page-load
+      // lifecycle flag — if it leaked into localStorage and rehydrated as
+      // "loading", LandingRoute's useEffect (gated on "idle") would never
+      // re-fire the fetch and the route would spin forever.
+      partialize: (state) => ({
+        config: state.config,
+        lastSavedChatMode: state.lastSavedChatMode,
+      }),
       onRehydrateStorage: () => (state) => {
         if (state?.config) applyTheme(state.config);
       },

@@ -29,14 +29,14 @@ export function LoginPage() {
   const initAuth = useAuthStore((s) => s.init);
   const brand = useConfigStore((s) => s.config.brand);
   const tagline = useConfigStore((s) => s.config.tagline);
-  const configLoadStatus = useConfigStore((s) => s.loadStatus);
   const loadConfig = useConfigStore((s) => s.loadFromBackend);
 
   useEffect(() => {
     // Direct hits to /login bypass LandingRoute, so the persisted config
-    // might be stale. Fire the fetch once on mount.
-    if (configLoadStatus === "idle") void loadConfig();
-  }, [configLoadStatus, loadConfig]);
+    // might be stale (or wrong brand). Fire the fetch on mount; the
+    // store's load-status machine handles deduping internally.
+    void loadConfig();
+  }, [loadConfig]);
 
   const misconfiguredError = useMemo(() => {
     return searchParams.get("error") === "missing_role"

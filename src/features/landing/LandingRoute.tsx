@@ -21,8 +21,11 @@ export function LandingRoute() {
   const loadFromBackend = useConfigStore((s) => s.loadFromBackend);
 
   useEffect(() => {
-    if (loadStatus === "idle") void loadFromBackend();
-  }, [loadStatus, loadFromBackend]);
+    // Fire on mount regardless of current status: an old persisted
+    // "loading" value (from a navigation interrupted mid-fetch) would
+    // otherwise leave the route spinning forever.
+    void loadFromBackend();
+  }, [loadFromBackend]);
 
   // Block the render until the backend answers (or fails). On error we
   // fall back to local state, which is correct behavior — we treat
