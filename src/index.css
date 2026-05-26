@@ -2310,14 +2310,35 @@ a.cite:hover .ix { color: var(--teal-deep); }
 /* Filter chip bar (user KB page) */
 .tag-filter-bar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 12px 14px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
   background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: var(--r-md);
   margin-bottom: 20px;
+}
+.tag-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.tag-filter-available {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--rule);
+}
+.tag-filter-available-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted-2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-right: 4px;
 }
 .tag-filter-label {
   font-family: var(--mono);
@@ -2339,22 +2360,76 @@ a.cite:hover .ix { color: var(--teal-deep); }
   letter-spacing: 0.04em;
   padding: 4px 9px;
   border-radius: 999px;
-  cursor: pointer;
   text-transform: lowercase;
+  line-height: 1;
 }
-.tag-filter-chip:hover { border-color: var(--ink-2); color: var(--ink); }
+button.tag-filter-chip { cursor: pointer; }
+button.tag-filter-chip:hover {
+  border-color: var(--ink-2);
+  color: var(--ink);
+}
 .tag-filter-chip[data-active="true"] {
   background: var(--ink);
   color: #fff;
   border-color: var(--ink);
+  padding-right: 4px;
 }
+.tag-filter-chip-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-left: 2px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.tag-filter-chip-x:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+.tag-filter-input {
+  flex: 1;
+  min-width: 160px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink);
+  padding: 4px 4px;
+  letter-spacing: 0.02em;
+}
+.tag-filter-input::placeholder {
+  color: var(--muted-2);
+  text-transform: lowercase;
+}
+.tag-filter-more {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.tag-filter-more:hover { color: var(--ink); }
 .tag-filter-clear {
   margin-left: auto;
+  font-family: var(--mono);
   font-size: 11px;
   color: var(--muted);
   background: transparent;
   border: none;
   cursor: pointer;
   text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 .tag-filter-clear:hover { color: var(--ink); }
