@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut, ExternalLink, Library, Sparkles, PanelLeft, PanelLeftClose } from "lucide-react";
+import { LogOut, Library, Sparkles, PanelLeft, PanelLeftClose } from "lucide-react";
 
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useConfigStore } from "@/stores/useConfigStore";
@@ -66,12 +66,6 @@ export function WorkspaceSidebar() {
         <Library className="sl-icon" />
         <span>Knowledge base</span>
       </Link>
-
-      <div className="admin-side-section">Visit</div>
-      <a href="/" target="_blank" rel="noopener" className="admin-side-link">
-        <ExternalLink className="sl-icon" />
-        <span>View public site</span>
-      </a>
 
       <div className="admin-user">
         <div className="admin-user-av">{initial}</div>
