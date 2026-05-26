@@ -2374,6 +2374,21 @@ button.tag-filter-chip:hover {
   border-color: var(--ink);
   padding-right: 4px;
 }
+.tag-filter-chip[data-highlighted="true"] {
+  border-color: var(--teal-deep);
+  background: var(--teal-tint);
+  color: var(--teal-deep);
+}
+.tag-filter-match {
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+}
+.tag-filter-no-match {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
 .tag-filter-chip-x {
   display: inline-flex;
   align-items: center;

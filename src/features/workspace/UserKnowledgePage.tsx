@@ -4,8 +4,10 @@ import {
   useState,
   type ChangeEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from "react";
 import { X } from "lucide-react";
+import Fuse from "fuse.js";
 
 import { useFilesStore } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
@@ -16,12 +18,57 @@ import { fmtBytes } from "@/lib/format";
  *
  * Filter UX: active filters render as removable chips next to a free-form
  * input — typing then pressing space, comma, or Enter commits the token
- * as an active filter chip. Available corpus tags appear below as
- * clickable suggestions, capped at MAX_VISIBLE with a "+N more" toggle
- * so the bar never overwhelms the page when the corpus has many tags.
- * Filter is OR + case-folded across active chips.
+ * as an active filter chip. When the user is typing, a "matches" row
+ * below shows corpus tags whose name contains the current draft (case-
+ * insensitive); arrow keys highlight, Enter on a highlighted match
+ * commits it, Enter without a highlight commits the raw text. When the
+ * draft is empty, the bottom row instead shows all available corpus tags
+ * capped at MAX_VISIBLE with a "+N more" toggle so the bar never
+ * overwhelms the page. Filter is OR + case-folded across active chips.
  */
 const MAX_VISIBLE_AVAILABLE = 12;
+const MAX_VISIBLE_SUGGESTIONS = 12;
+
+// Fuse threshold: 0.0 = exact, 1.0 = match anything. Tags are short, so
+// 0.4 lets a one-character typo through ("cohrt" → "cohort") without
+// becoming too noisy.
+const FUSE_OPTIONS = {
+  threshold: 0.4,
+  ignoreLocation: true,
+  includeMatches: true,
+  minMatchCharLength: 1,
+} as const;
+
+type SuggestionResult = {
+  tag: string;
+  indices: ReadonlyArray<readonly [number, number]>;
+};
+
+/**
+ * Wrap each matched character range in `<mark>` so the user can see why
+ * a suggestion was returned. Fuse may return multiple non-contiguous
+ * ranges per result, so we sort + walk them in one pass.
+ */
+function highlightFuzzy(
+  label: string,
+  indices: ReadonlyArray<readonly [number, number]>,
+): ReactNode {
+  if (!indices || indices.length === 0) return label;
+  const sorted = [...indices].sort((a, b) => a[0] - b[0]);
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+  for (const [start, end] of sorted) {
+    if (start > cursor) parts.push(label.slice(cursor, start));
+    parts.push(
+      <mark key={`m${start}`} className="tag-filter-match">
+        {label.slice(start, end + 1)}
+      </mark>,
+    );
+    cursor = end + 1;
+  }
+  if (cursor < label.length) parts.push(label.slice(cursor));
+  return <>{parts}</>;
+}
 
 export function UserKnowledgePage() {
   const files = useFilesStore((s) => s.files);
@@ -31,6 +78,7 @@ export function UserKnowledgePage() {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const [draft, setDraft] = useState("");
   const [expanded, setExpanded] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   useEffect(() => {
     void refresh();
@@ -116,10 +164,36 @@ export function UserKnowledgePage() {
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (suggestions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((i) =>
+          i < 0 ? 0 : (i + 1) % suggestions.length,
+        );
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((i) =>
+          i <= 0 ? suggestions.length - 1 : i - 1,
+        );
+        return;
+      }
+    }
     if (e.key === "Enter") {
       e.preventDefault();
-      if (draft.trim()) addFilter(draft);
-    } else if (e.key === "Backspace" && draft === "" && activeFilters.size > 0) {
+      if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
+        addFilter(suggestions[highlightedIndex].tag);
+      } else if (draft.trim()) {
+        addFilter(draft);
+      }
+      return;
+    }
+    if (e.key === "Escape") {
+      if (draft) setDraft("");
+      return;
+    }
+    if (e.key === "Backspace" && draft === "" && activeFilters.size > 0) {
       // Empty-field backspace removes the most recent chip.
       const last = [...activeFilters].pop();
       if (last) removeFilter(last);
@@ -130,6 +204,31 @@ export function UserKnowledgePage() {
     () => corpusTags.filter((t) => !activeFilters.has(t.toLowerCase())),
     [corpusTags, activeFilters],
   );
+
+  const trimmedDraft = draft.trim().toLowerCase();
+  const fuse = useMemo(
+    () => new Fuse(availableTags, FUSE_OPTIONS),
+    [availableTags],
+  );
+  const suggestions = useMemo<SuggestionResult[]>(() => {
+    if (!trimmedDraft) return [];
+    return fuse
+      .search(trimmedDraft)
+      .slice(0, MAX_VISIBLE_SUGGESTIONS)
+      .map((r) => ({
+        tag: r.item,
+        indices: r.matches?.[0]?.indices ?? [],
+      }));
+  }, [fuse, trimmedDraft]);
+
+  // Reset / clamp the highlight when the visible suggestions change.
+  useEffect(() => {
+    setHighlightedIndex((prev) => {
+      if (suggestions.length === 0) return -1;
+      if (prev < 0 || prev >= suggestions.length) return -1;
+      return prev;
+    });
+  }, [suggestions]);
 
   const visibleAvailable = expanded
     ? availableTags
@@ -190,30 +289,57 @@ export function UserKnowledgePage() {
             </button>
           )}
         </div>
-        {availableTags.length > 0 && (
-          <div className="tag-filter-available">
-            <span className="tag-filter-available-label">available</span>
-            {visibleAvailable.map((t) => (
-              <button
-                key={t}
-                type="button"
-                className="tag-filter-chip"
-                onClick={() => addFilter(t)}
-                title={`Filter by "${t}"`}
-              >
-                {t}
-              </button>
-            ))}
-            {overflowCount > 0 && (
-              <button
-                type="button"
-                className="tag-filter-more"
-                onClick={() => setExpanded((v) => !v)}
-              >
-                {expanded ? "show less" : `+${overflowCount} more`}
-              </button>
+        {trimmedDraft ? (
+          <div className="tag-filter-available" role="listbox" aria-label="Tag suggestions">
+            <span className="tag-filter-available-label">matches</span>
+            {suggestions.length === 0 ? (
+              <span className="tag-filter-no-match">
+                no matching tag · press Enter to add “{trimmedDraft}” as-is
+              </span>
+            ) : (
+              suggestions.map((s, i) => (
+                <button
+                  key={s.tag}
+                  type="button"
+                  role="option"
+                  aria-selected={i === highlightedIndex}
+                  className="tag-filter-chip"
+                  data-highlighted={i === highlightedIndex ? "true" : undefined}
+                  onMouseEnter={() => setHighlightedIndex(i)}
+                  onClick={() => addFilter(s.tag)}
+                  title={`Filter by "${s.tag}"`}
+                >
+                  {highlightFuzzy(s.tag, s.indices)}
+                </button>
+              ))
             )}
           </div>
+        ) : (
+          availableTags.length > 0 && (
+            <div className="tag-filter-available">
+              <span className="tag-filter-available-label">available</span>
+              {visibleAvailable.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className="tag-filter-chip"
+                  onClick={() => addFilter(t)}
+                  title={`Filter by "${t}"`}
+                >
+                  {t}
+                </button>
+              ))}
+              {overflowCount > 0 && (
+                <button
+                  type="button"
+                  className="tag-filter-more"
+                  onClick={() => setExpanded((v) => !v)}
+                >
+                  {expanded ? "show less" : `+${overflowCount} more`}
+                </button>
+              )}
+            </div>
+          )
         )}
       </div>
 
