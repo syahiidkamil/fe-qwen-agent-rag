@@ -20,4 +20,5 @@ export interface KbFile {
   chunks: number;
   progress: number;
   error?: string;
+  tags: string[];
 }

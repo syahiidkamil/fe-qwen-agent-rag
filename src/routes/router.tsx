@@ -5,7 +5,9 @@ import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
 import { AdminKnowledgePage } from "@/features/admin/knowledge/AdminKnowledgePage";
 import { AdminUsersPage } from "@/features/admin/users/AdminUsersPage";
-import { WorkspacePage } from "@/features/workspace/WorkspacePage";
+import { WorkspaceLayout } from "@/features/workspace/WorkspaceLayout";
+import { AiHelpPage } from "@/features/workspace/AiHelpPage";
+import { UserKnowledgePage } from "@/features/workspace/UserKnowledgePage";
 import { RoleGuard, defaultRouteForRole } from "@/routes/RoleGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -46,7 +48,17 @@ const router = createBrowserRouter([
   // directly to see what their team's surface looks like.
   {
     element: <RoleGuard allowedRoles={["user", "admin", "super_admin"]} />,
-    children: [{ path: "/workspace", element: <WorkspacePage /> }],
+    children: [
+      {
+        path: "/workspace",
+        element: <WorkspaceLayout />,
+        children: [
+          { index: true, element: <Navigate to="/workspace/ai-help" replace /> },
+          { path: "ai-help", element: <AiHelpPage /> },
+          { path: "knowledge", element: <UserKnowledgePage /> },
+        ],
+      },
+    ],
   },
   { path: "*", element: <NotFound /> },
 ]);

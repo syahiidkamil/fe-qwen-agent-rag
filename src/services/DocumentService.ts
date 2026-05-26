@@ -9,6 +9,7 @@ interface BackendDoc {
   status: KbFileStatus;
   chunk_count: number;
   error_message: string | null;
+  tags: string[];
   uploaded_at: string;
 }
 
@@ -36,6 +37,7 @@ function toKbFile(d: BackendDoc): KbFile {
     chunks: d.chunk_count,
     progress: d.status === "ingested" ? 100 : d.status === "ingesting" ? 50 : 0,
     error: d.error_message ?? undefined,
+    tags: Array.isArray(d.tags) ? d.tags : [],
   };
 }
 
@@ -65,10 +67,13 @@ export const DocumentService = {
     return toKbFile(data.data);
   },
 
-  async rename(id: string, filename: string): Promise<KbFile> {
+  async update(
+    id: string,
+    patch: { filename?: string; tags?: string[] },
+  ): Promise<KbFile> {
     const { data } = await api.patch<{ data: BackendDoc }>(
       `/api/documents/${id}`,
-      { filename },
+      patch,
     );
     return toKbFile(data.data);
   },

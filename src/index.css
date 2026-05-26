@@ -2112,3 +2112,220 @@ a.cite:hover .ix { color: var(--teal-deep); }
   border-color: var(--rule);
   color: var(--ink-2);
 }
+
+/* ========== Collapsible sidebar — shared between admin + workspace shells ========== */
+.admin-app {
+  /* Switch from fixed `grid-template-columns: 240px 1fr` to a CSS variable so
+     the collapsed sidebar can change the column width without a layout
+     thrash. */
+  grid-template-columns: var(--side-w, 240px) 1fr;
+  transition: grid-template-columns 160ms ease;
+}
+.admin-app.is-collapsed { --side-w: 64px; }
+
+.admin-side {
+  overflow-x: hidden;
+  transition: padding 160ms ease;
+}
+.is-collapsed .admin-side {
+  padding: 24px 8px;
+  align-items: center;
+}
+.is-collapsed .admin-side-brand {
+  padding: 0 0 16px;
+  justify-content: center;
+}
+.is-collapsed .admin-side-brand > span,
+.is-collapsed .admin-side-section,
+.is-collapsed .admin-side-link > span,
+.is-collapsed .admin-side-link .sl-count,
+.is-collapsed .admin-user-meta {
+  display: none;
+}
+.is-collapsed .admin-side-link {
+  justify-content: center;
+  padding: 9px 0;
+}
+.is-collapsed .admin-side-link .sl-icon {
+  margin: 0;
+}
+.is-collapsed .admin-user {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+/* Toggle button at the top of every sidebar */
+.sidebar-toggle {
+  align-self: flex-end;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.sidebar-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink-2);
+}
+.is-collapsed .sidebar-toggle {
+  align-self: center;
+}
+
+/* ========== ChatPanel full-page variant ========== */
+.chat-panel[data-fullpage="true"] {
+  position: relative;
+  inset: auto;
+  bottom: auto;
+  right: auto;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  animation: none;
+}
+.chat-panel[data-fullpage="true"] .chat-head {
+  border-radius: 0;
+}
+.chat-panel[data-fullpage="true"] .chat-body {
+  /* Center messages in a reading column so the wide content area doesn't
+     stretch lines to unreadable lengths. */
+  padding-left: max(24px, calc((100% - 720px) / 2));
+  padding-right: max(24px, calc((100% - 720px) / 2));
+}
+.chat-panel[data-fullpage="true"] .chat-suggestions,
+.chat-panel[data-fullpage="true"] .chat-input {
+  padding-left: max(24px, calc((100% - 720px) / 2));
+  padding-right: max(24px, calc((100% - 720px) / 2));
+}
+
+/* ========== AI Help full-page shell ========== */
+.ai-help-shell {
+  /* Escape .admin-content's padding (32px top, var(--pad) horizontal, 100px
+     bottom) so the chat surface fills the column. The topbar is ~58px on
+     desktop; we let the chat absorb the rest. */
+  margin: -32px calc(-1 * var(--pad)) -100px;
+  height: calc(100vh - 58px);
+  display: flex;
+  flex-direction: column;
+}
+.ai-help-shell > .chat-panel { flex: 1; }
+
+/* ========== Tag chips + tag input + field-sub helper text ========== */
+.field-sub {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--paper-2, var(--paper));
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 3px 7px 3px 6px;
+  border-radius: 4px;
+  text-transform: lowercase;
+}
+.tag-chip[data-removable] { padding-right: 3px; }
+.tag-chip-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 3px;
+  margin-left: 1px;
+}
+.tag-chip-x:hover { color: var(--ink); background: var(--rule); }
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  background: var(--paper);
+}
+.tag-input:focus-within { border-color: var(--teal-deep); }
+.tag-input-field {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--ink);
+  padding: 4px 2px;
+}
+.tag-input-field::placeholder { color: var(--muted); }
+
+/* Filter chip bar (user KB page) */
+.tag-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  margin-bottom: 20px;
+}
+.tag-filter-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.tag-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+  text-transform: lowercase;
+}
+.tag-filter-chip:hover { border-color: var(--ink-2); color: var(--ink); }
+.tag-filter-chip[data-active="true"] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.tag-filter-clear {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.tag-filter-clear:hover { color: var(--ink); }

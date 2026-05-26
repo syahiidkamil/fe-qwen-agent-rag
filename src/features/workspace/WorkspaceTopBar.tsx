@@ -1,19 +1,17 @@
 import { useLocation } from "react-router";
 
 const CRUMBS: Record<string, string> = {
-  "/admin/cms": "Landing CMS",
-  "/admin/knowledge": "Knowledge base",
-  "/admin/users": "Users",
+  "/workspace/ai-help": "AI Help",
+  "/workspace/knowledge": "Knowledge base",
 };
 
-export function AdminTopBar() {
+export function WorkspaceTopBar() {
   const location = useLocation();
-  const label = CRUMBS[location.pathname] ?? "Admin";
-
+  const label = CRUMBS[location.pathname] ?? "Workspace";
   return (
     <div className="admin-top">
       <div className="crumb">
-        <span>Admin</span>
+        <span>Workspace</span>
         <span>/</span>
         <b>{label}</b>
       </div>
@@ -39,7 +37,7 @@ export function AdminTopBar() {
               verticalAlign: "middle",
             }}
           />
-          workspace · airanext
+          team workspace · airanext
         </span>
       </div>
     </div>

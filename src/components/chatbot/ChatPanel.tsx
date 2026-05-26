@@ -10,10 +10,14 @@ import { MarkdownText } from "@/components/chatbot/MarkdownText";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
 
 interface ChatPanelProps {
-  onClose: () => void;
+  /** Close handler. Required in popup mode; ignored in full-page mode. */
+  onClose?: () => void;
+  /** When true: drop the dialog dimensions, hide the close button, and
+   *  center the content as a reading column. */
+  fullPage?: boolean;
 }
 
-export function ChatPanel({ onClose }: ChatPanelProps) {
+export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
   const widget = useConfigStore((s) => s.config.widget);
   const chatMode = useConfigStore((s) => s.config.chat_mode);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -65,6 +69,7 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
       role="dialog"
       aria-label="Chat with assistant"
       data-gated={showGate ? "true" : undefined}
+      data-fullpage={fullPage ? "true" : undefined}
     >
       <div className="chat-head">
         <div className="chat-avatar">{widget.initial}</div>
@@ -85,14 +90,16 @@ export function ChatPanel({ onClose }: ChatPanelProps) {
         >
           <RotateCcw size={13} strokeWidth={2.2} />
         </button>
-        <button
-          type="button"
-          className="chat-head-close"
-          onClick={onClose}
-          aria-label="Close chat"
-        >
-          <X size={14} strokeWidth={2.2} />
-        </button>
+        {!fullPage && (
+          <button
+            type="button"
+            className="chat-head-close"
+            onClick={onClose}
+            aria-label="Close chat"
+          >
+            <X size={14} strokeWidth={2.2} />
+          </button>
+        )}
       </div>
 
       <div

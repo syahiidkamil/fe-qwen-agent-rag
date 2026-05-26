@@ -5,7 +5,7 @@ import type { KbFile } from "@/types/file";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
 import { fmtBytes } from "@/lib/format";
-import { RenameDialog } from "@/features/admin/knowledge/RenameDialog";
+import { EditDocumentDialog } from "@/features/admin/knowledge/EditDocumentDialog";
 
 interface FilesTableProps {
   files: KbFile[];
@@ -16,7 +16,7 @@ export function FilesTable({ files, filterActive }: FilesTableProps) {
   const startIngest = useFilesStore((s) => s.startIngest);
   const retryIngest = useFilesStore((s) => s.retryIngest);
   const removeFile = useFilesStore((s) => s.removeFile);
-  const [renameTarget, setRenameTarget] = useState<KbFile | null>(null);
+  const [editTarget, setEditTarget] = useState<KbFile | null>(null);
 
   if (files.length === 0) {
     return (
@@ -37,6 +37,7 @@ export function FilesTable({ files, filterActive }: FilesTableProps) {
           <tr>
             <th style={{ width: "40%" }}>File</th>
             <th>Status</th>
+            <th>Tags</th>
             <th>Uploaded</th>
             <th style={{ textAlign: "right" }}>Size</th>
             <th style={{ textAlign: "right" }}>Chunks</th>
@@ -57,15 +58,15 @@ export function FilesTable({ files, filterActive }: FilesTableProps) {
                 removeFile(f.id);
                 toast(`Removed ${f.name}`);
               }}
-              onRename={() => setRenameTarget(f)}
+              onRename={() => setEditTarget(f)}
             />
           ))}
         </tbody>
       </table>
-      {renameTarget && (
-        <RenameDialog
-          file={renameTarget}
-          onClose={() => setRenameTarget(null)}
+      {editTarget && (
+        <EditDocumentDialog
+          file={editTarget}
+          onClose={() => setEditTarget(null)}
         />
       )}
     </div>
@@ -117,6 +118,17 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             </span>
           )}
         </span>
+      </td>
+      <td>
+        {f.tags.length === 0 ? (
+          <span style={{ color: "var(--muted-2)", fontSize: 12 }}>—</span>
+        ) : (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {f.tags.map((t) => (
+              <span key={t} className="tag-chip">{t}</span>
+            ))}
+          </div>
+        )}
       </td>
       <td>
         <span
@@ -180,8 +192,8 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             type="button"
             className="row-act"
             onClick={onRename}
-            title="Rename"
-            aria-label="Rename"
+            title="Edit document"
+            aria-label="Edit document"
           >
             <Pencil size={11} strokeWidth={1.5} />
           </button>

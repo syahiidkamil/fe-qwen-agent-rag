@@ -12,7 +12,7 @@ interface RoleGuardProps {
  * Centralised so login, RoleGuard, and any future "go home" link agree.
  */
 export function defaultRouteForRole(role: Role | null): string {
-  if (role === "user") return "/workspace";
+  if (role === "user") return "/workspace/ai-help";
   if (role === "super_admin") return "/admin/cms";
   if (role === "admin") return "/admin/knowledge";
   return "/login";

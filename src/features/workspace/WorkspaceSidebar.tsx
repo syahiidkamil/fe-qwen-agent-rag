@@ -1,21 +1,18 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut, FileText, Library, ExternalLink, Users, PanelLeft, PanelLeftClose } from "lucide-react";
+import { LogOut, ExternalLink, Library, Sparkles, PanelLeft, PanelLeftClose } from "lucide-react";
+
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useConfigStore } from "@/stores/useConfigStore";
-import { useFilesStore } from "@/stores/useFilesStore";
 import { useUiStore } from "@/stores/useUiStore";
 
-export function AdminSidebar() {
+export function WorkspaceSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const config = useConfigStore((s) => s.config);
-  const email = useAuthStore((s) => s.email) ?? "ops@airanext.id";
-  const role = useAuthStore((s) => s.role);
+  const email = useAuthStore((s) => s.email) ?? "you@airanext.id";
   const logout = useAuthStore((s) => s.logout);
-  const totalFiles = useFilesStore((s) => s.files.length);
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
-  const isSuperAdmin = role === "super_admin";
 
   const handleLogout = () => {
     logout();
@@ -23,12 +20,8 @@ export function AdminSidebar() {
   };
 
   const isActive = (path: string) => location.pathname.startsWith(path);
-
-  const name = email.split("@")[0].split(/[._]/)[0];
-  const displayName = name
-    ? name.charAt(0).toUpperCase() + name.slice(1)
-    : "Staff";
-  const initial = displayName.charAt(0);
+  const displayName = email.split("@")[0].split(/[._]/)[0];
+  const initial = displayName ? displayName.charAt(0).toUpperCase() : "U";
 
   return (
     <aside className="admin-side">
@@ -45,6 +38,7 @@ export function AdminSidebar() {
           <PanelLeftClose size={13} strokeWidth={1.8} />
         )}
       </button>
+
       <Link to="/" className="admin-side-brand">
         <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
           <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--ink)" />
@@ -54,58 +48,44 @@ export function AdminSidebar() {
         <span>{config.brand}</span>
       </Link>
 
-      <div className="admin-side-section">Manage</div>
-      {isSuperAdmin && (
-        <Link
-          to="/admin/cms"
-          className="admin-side-link"
-          data-active={isActive("/admin/cms")}
-        >
-          <FileText className="sl-icon" />
-          <span>Landing CMS</span>
-        </Link>
-      )}
+      <div className="admin-side-section">Workspace</div>
       <Link
-        to="/admin/knowledge"
+        to="/workspace/ai-help"
         className="admin-side-link"
-        data-active={isActive("/admin/knowledge")}
+        data-active={isActive("/workspace/ai-help")}
+      >
+        <Sparkles className="sl-icon" />
+        <span>AI Help</span>
+      </Link>
+      <Link
+        to="/workspace/knowledge"
+        className="admin-side-link"
+        data-active={isActive("/workspace/knowledge")}
       >
         <Library className="sl-icon" />
         <span>Knowledge base</span>
-        <span className="sl-count">{totalFiles}</span>
-      </Link>
-      <Link
-        to="/admin/users"
-        className="admin-side-link"
-        data-active={isActive("/admin/users")}
-      >
-        <Users className="sl-icon" />
-        <span>Users</span>
       </Link>
 
       <div className="admin-side-section">Visit</div>
       <a href="/" target="_blank" rel="noopener" className="admin-side-link">
         <ExternalLink className="sl-icon" />
         <span>View public site</span>
-        <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--muted-2)" }}>
-          ↗
-        </span>
       </a>
 
       <div className="admin-user">
         <div className="admin-user-av">{initial}</div>
         <div className="admin-user-meta">
-          <div className="admin-user-name">{displayName}</div>
+          <div className="admin-user-name">{displayName || "You"}</div>
           <div className="admin-user-mail">{email}</div>
         </div>
         <button
           type="button"
           className="admin-user-logout"
           onClick={handleLogout}
-          title="Sign out"
           aria-label="Sign out"
+          title="Sign out"
         >
-          <LogOut size={13} strokeWidth={1.6} />
+          <LogOut size={13} strokeWidth={1.8} />
         </button>
       </div>
     </aside>
