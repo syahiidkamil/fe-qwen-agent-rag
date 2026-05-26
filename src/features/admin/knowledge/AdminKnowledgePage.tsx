@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useFilesStore } from "@/stores/useFilesStore";
 import type { KbFileStatus } from "@/types/file";
@@ -9,10 +8,8 @@ import { FilesTable } from "@/features/admin/knowledge/FilesTable";
 
 export function AdminKnowledgePage() {
   const files = useFilesStore((s) => s.files);
-  const addFiles = useFilesStore((s) => s.addFiles);
   const startIngest = useFilesStore((s) => s.startIngest);
   const refresh = useFilesStore((s) => s.refresh);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     void refresh();
@@ -61,26 +58,6 @@ export function AdminKnowledgePage() {
               Ingest all pending ({pendingCount})
             </button>
           )}
-          <button
-            type="button"
-            className="btn btn-teal btn-sm"
-            onClick={() => inputRef.current?.click()}
-          >
-            <ArrowUp size={12} strokeWidth={1.8} />
-            Upload
-          </button>
-          <input
-            ref={inputRef}
-            type="file"
-            multiple
-            hidden
-            onChange={(e) => {
-              if (e.target.files?.length) {
-                void addFiles(Array.from(e.target.files));
-                e.target.value = "";
-              }
-            }}
-          />
         </div>
       </div>
 

@@ -1391,22 +1391,39 @@ a { color: inherit; text-decoration: none; }
 }
 
 .dropzone {
-  border: 1.5px dashed var(--rule);
+  position: relative;
+  /* Painted as an SVG so we get full control of dash length + gap,
+     which CSS `border: dashed` doesn't allow. 12px dash + 8px gap reads
+     clearly as dashed even at the corner radii. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'><rect width='100%25' height='100%25' rx='14' ry='14' fill='none' stroke='%23DCE5E4' stroke-width='2' stroke-dasharray='12 8'/></svg>");
+  background-color: var(--paper);
   border-radius: var(--r-lg);
-  background: var(--paper);
-  padding: 32px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 32px;
+  padding: 48px 32px;
+  display: flex;
   align-items: center;
-  transition: all .15s ease;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color .15s ease, transform .15s ease;
+}
+.dropzone:hover {
+  background-color: var(--bg);
+}
+.dropzone:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
 }
 .dropzone[data-drag="true"] {
-  border-color: var(--teal);
-  background: var(--teal-tint);
-  border-style: solid;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'><rect width='100%25' height='100%25' rx='14' ry='14' fill='none' stroke='%231FC7AE' stroke-width='2.5'/></svg>");
+  background-color: var(--teal-tint);
 }
-.dropzone-text { display: flex; flex-direction: column; gap: 6px; }
+.dropzone-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-width: 560px;
+}
 .dropzone-title {
   font-family: var(--display);
   font-weight: 600;
@@ -1414,7 +1431,11 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
-.dropzone-sub { font-size: 13px; color: var(--muted); }
+.dropzone-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
 .dropzone-icon {
   width: 56px; height: 56px;
   border-radius: 14px;
@@ -1423,8 +1444,10 @@ a { color: inherit; text-decoration: none; }
   display: inline-flex; align-items: center; justify-content: center;
   margin-bottom: 12px;
 }
-.dropzone-controls {
-  display: flex; flex-direction: column; gap: 14px; align-items: flex-end;
+.dropzone-checkbox {
+  position: absolute;
+  top: 16px;
+  right: 18px;
 }
 .checkbox-row {
   display: inline-flex; align-items: center; gap: 10px;
@@ -1934,8 +1957,8 @@ a.cite:hover .ix { color: var(--teal-deep); }
 @media (max-width: 640px) {
   .land-nav-links { display: none; }
   .chat-panel { width: calc(100vw - 24px); right: 12px; bottom: 12px; height: 70vh; }
-  .dropzone { grid-template-columns: 1fr; }
-  .dropzone-controls { align-items: flex-start; }
+  .dropzone { padding: 32px 16px; }
+  .dropzone-checkbox { position: static; margin-bottom: 16px; }
   .login-form-side { padding: 32px 24px; }
   .stats-inner { grid-template-columns: 1fr; }
   .stat { border-right: 0; }
