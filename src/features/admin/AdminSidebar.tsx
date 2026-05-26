@@ -32,27 +32,29 @@ export function AdminSidebar() {
 
   return (
     <aside className="admin-side">
-      <button
-        type="button"
-        className="sidebar-toggle"
-        onClick={toggleSidebar}
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {collapsed ? (
-          <PanelLeft size={13} strokeWidth={1.8} />
-        ) : (
-          <PanelLeftClose size={13} strokeWidth={1.8} />
-        )}
-      </button>
-      <Link to="/" className="admin-side-brand">
-        <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
-          <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--ink)" />
-          <path d="M13 5L20 19H17.5L13 9.5L8.5 19H6L13 5Z" fill="#fff" />
-          <circle cx="13" cy="19.5" r="2" fill="var(--teal-bright)" />
-        </svg>
-        <span>{config.brand}</span>
-      </Link>
+      <div className="admin-side-header">
+        <Link to="/" className="admin-side-brand">
+          <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
+            <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--ink)" />
+            <path d="M13 5L20 19H17.5L13 9.5L8.5 19H6L13 5Z" fill="#fff" />
+            <circle cx="13" cy="19.5" r="2" fill="var(--teal-bright)" />
+          </svg>
+          <span>{config.brand}</span>
+        </Link>
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={toggleSidebar}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <PanelLeft size={13} strokeWidth={1.8} />
+          ) : (
+            <PanelLeftClose size={13} strokeWidth={1.8} />
+          )}
+        </button>
+      </div>
 
       <div className="admin-side-section">Manage</div>
       {isSuperAdmin && (

@@ -70,13 +70,16 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
       aria-label="Chat with assistant"
       data-gated={showGate ? "true" : undefined}
       data-fullpage={fullPage ? "true" : undefined}
+      data-empty={showSuggestions && !showGate ? "true" : undefined}
     >
       <div className="chat-head">
         <div className="chat-avatar">{widget.initial}</div>
         <div className="chat-head-text">
           <div className="chat-name">{widget.name}</div>
           <div className="chat-status">
-            grounded · {indexedCount} sources indexed
+            {indexedCount > 0
+              ? `grounded · ${indexedCount} ${indexedCount === 1 ? "source" : "sources"} indexed`
+              : "ai agent helper"}
           </div>
         </div>
         <button

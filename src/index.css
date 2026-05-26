@@ -1008,19 +1008,33 @@ a { color: inherit; text-decoration: none; }
   background: var(--paper);
   border-right: 1px solid var(--rule);
   display: flex; flex-direction: column;
-  padding: 24px 16px;
+  padding: 0 16px;
   position: sticky; top: 0;
   height: 100vh;
 }
-.admin-side-brand {
-  padding: 0 8px 24px;
+.admin-side-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 8px;
+  min-height: 56px;
   border-bottom: 1px solid var(--rule);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+.admin-side-brand {
+  flex: 1;
+  min-width: 0;
   display: flex; align-items: center; gap: 10px;
   font-family: var(--display);
   font-weight: 600;
-  font-size: 18px;
-  letter-spacing: -0.02em;
+  font-size: 15px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.admin-side-brand > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .admin-side-section {
   font-family: var(--mono);
@@ -1063,7 +1077,8 @@ a { color: inherit; text-decoration: none; }
 
 .admin-user {
   margin-top: auto;
-  padding-top: 16px;
+  padding: 0 8px;
+  min-height: 57px;
   border-top: 1px solid var(--rule);
   display: flex; align-items: center; gap: 10px;
 }
@@ -1100,7 +1115,8 @@ a { color: inherit; text-decoration: none; }
   background: color-mix(in oklab, var(--bg), transparent 6%);
   backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--rule);
-  padding: 14px var(--pad);
+  padding: 0 var(--pad);
+  min-height: 56px;
   display: flex; align-items: center; gap: 16px;
 }
 .crumb {
@@ -2131,8 +2147,16 @@ a.cite:hover .ix { color: var(--teal-deep); }
   padding: 24px 8px;
   align-items: center;
 }
+.is-collapsed .admin-side-header {
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+  min-height: 80px;
+}
 .is-collapsed .admin-side-brand {
-  padding: 0 0 16px;
+  padding: 0;
   justify-content: center;
 }
 .is-collapsed .admin-side-brand > span,
@@ -2154,27 +2178,24 @@ a.cite:hover .ix { color: var(--teal-deep); }
   padding: 12px 0;
 }
 
-/* Toggle button at the top of every sidebar */
+/* Toggle button — sits in the sidebar header row next to the brand */
 .sidebar-toggle {
-  align-self: flex-end;
+  flex-shrink: 0;
   width: 26px;
   height: 26px;
   border-radius: 6px;
   border: 1px solid var(--rule);
   background: var(--paper);
-  color: var(--ink-2);
+  color: var(--muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin-bottom: 8px;
+  transition: color .15s ease, border-color .15s ease;
 }
 .sidebar-toggle:hover {
   color: var(--ink);
   border-color: var(--ink-2);
-}
-.is-collapsed .sidebar-toggle {
-  align-self: center;
 }
 
 /* ========== ChatPanel full-page variant ========== */
@@ -2205,13 +2226,21 @@ a.cite:hover .ix { color: var(--teal-deep); }
   padding-right: max(24px, calc((100% - 720px) / 2));
 }
 
+/* Empty state: collapse the dead space between greeting and suggestions
+   by anchoring the greeting bubble to the bottom of the chat body so it
+   sits just above the "Try asking" chips. */
+.chat-panel[data-empty="true"] .chat-body {
+  justify-content: flex-end;
+  padding-bottom: 16px;
+}
+
 /* ========== AI Help full-page shell ========== */
 .ai-help-shell {
   /* Escape .admin-content's padding (32px top, var(--pad) horizontal, 100px
-     bottom) so the chat surface fills the column. The topbar is ~58px on
-     desktop; we let the chat absorb the rest. */
+     bottom) so the chat surface fills the column. The topbar is 57px tall
+     (56px min-height + 1px border); the chat absorbs the rest. */
   margin: -32px calc(-1 * var(--pad)) -100px;
-  height: calc(100vh - 58px);
+  height: calc(100vh - 57px);
   display: flex;
   flex-direction: column;
 }
