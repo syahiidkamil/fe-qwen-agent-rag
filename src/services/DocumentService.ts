@@ -33,7 +33,17 @@ function toKbFile(d: BackendDoc): KbFile {
     size: d.size_bytes ?? 0,
     type: inferType(d.filename, d.mime_type),
     status: d.status,
-    uploaded: new Date(d.uploaded_at).toLocaleString(),
+    uploaded: new Date(d.uploaded_at)
+      .toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+      // toLocaleString gives "May 23, 2026, 10:39 PM"; strip the
+      // commas so the cell can fit on a single row without wrapping.
+      .replace(/,/g, ""),
     chunks: d.chunk_count,
     progress: d.status === "ingested" ? 100 : d.status === "ingesting" ? 50 : 0,
     error: d.error_message ?? undefined,
@@ -84,5 +94,34 @@ export const DocumentService = {
       `/api/documents/${id}/view-url`,
     );
     return data.data.url;
+  },
+
+  /** Fetch one chunk's text — backs the document-viewer deep-link. */
+  async getChunk(docId: string, chunkId: string): Promise<{
+    id: string;
+    documentId: string;
+    chunkIndex: number;
+    content: string;
+  }> {
+    const { data } = await api.get<{
+      data: {
+        id: string;
+        document_id: string;
+        chunk_index: number;
+        content: string;
+      };
+    }>(`/api/documents/${docId}/chunks/${chunkId}`);
+    return {
+      id: data.data.id,
+      documentId: data.data.document_id,
+      chunkIndex: data.data.chunk_index,
+      content: data.data.content,
+    };
+  },
+
+  /** Fetch document metadata by id (filename, mime_type, etc.). */
+  async getOne(id: string): Promise<KbFile> {
+    const { data } = await api.get<{ data: BackendDoc }>(`/api/documents/${id}`);
+    return toKbFile(data.data);
   },
 };

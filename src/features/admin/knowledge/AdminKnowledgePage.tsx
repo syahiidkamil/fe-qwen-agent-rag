@@ -5,6 +5,7 @@ import type { KbFileStatus } from "@/types/file";
 import { Dropzone } from "@/features/admin/knowledge/Dropzone";
 import { FilesToolbar } from "@/features/admin/knowledge/FilesToolbar";
 import { FilesTable } from "@/features/admin/knowledge/FilesTable";
+import { KbSearch } from "@/components/shared/KbSearch";
 
 export function AdminKnowledgePage() {
   const files = useFilesStore((s) => s.files);
@@ -15,17 +16,12 @@ export function AdminKnowledgePage() {
     void refresh();
   }, [refresh]);
 
-  const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | KbFileStatus>("all");
 
   const filtered = useMemo(() => {
-    return files.filter((f) => {
-      if (filter !== "all" && f.status !== filter) return false;
-      if (search && !f.name.toLowerCase().includes(search.toLowerCase()))
-        return false;
-      return true;
-    });
-  }, [files, filter, search]);
+    if (filter === "all") return files;
+    return files.filter((f) => f.status === filter);
+  }, [files, filter]);
 
   const pendingCount = files.filter((f) => f.status === "uploaded").length;
 
@@ -63,18 +59,11 @@ export function AdminKnowledgePage() {
 
       <Dropzone />
 
-      <FilesToolbar
-        files={files}
-        search={search}
-        setSearch={setSearch}
-        filter={filter}
-        setFilter={setFilter}
-      />
+      <KbSearch placement="admin" />
 
-      <FilesTable
-        files={filtered}
-        filterActive={search !== "" || filter !== "all"}
-      />
+      <FilesToolbar files={files} filter={filter} setFilter={setFilter} />
+
+      <FilesTable files={filtered} filterActive={filter !== "all"} />
     </>
   );
 }

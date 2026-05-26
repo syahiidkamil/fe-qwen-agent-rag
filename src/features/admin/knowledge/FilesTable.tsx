@@ -52,13 +52,12 @@ export function FilesTable({ files, filterActive }: FilesTableProps) {
       <table className="kb-table">
         <thead>
           <tr>
-            <th style={{ width: "40%" }}>File</th>
+            <th style={{ width: "32%" }}>File</th>
             <th>Status</th>
-            <th>Tags</th>
+            <th style={{ width: "120px" }}>Tags</th>
             <th>Uploaded</th>
-            <th style={{ textAlign: "right" }}>Size</th>
-            <th style={{ textAlign: "right" }}>Chunks</th>
-            <th style={{ textAlign: "right" }}>Actions</th>
+            <th style={{ textAlign: "right", minWidth: "84px" }}>Size</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -118,9 +117,7 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
                 </div>
               )}
               {!f.error && f.status === "ingested" && (
-                <div className="file-sub">
-                  embedded · {f.chunks} chunks indexed · text-embed-3
-                </div>
+                <div className="file-sub">{f.chunks} chunks indexed</div>
               )}
               {!f.error && f.status === "uploaded" && (
                 <div className="file-sub">awaiting ingest</div>
@@ -166,7 +163,7 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
           </div>
         )}
       </td>
-      <td>
+      <td style={{ whiteSpace: "nowrap" }}>
         <span
           style={{
             fontFamily: "var(--mono)",
@@ -184,20 +181,10 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
           fontSize: 12,
           color: "var(--ink-2)",
           fontVariantNumeric: "tabular-nums",
+          whiteSpace: "nowrap",
         }}
       >
         {fmtBytes(f.size)}
-      </td>
-      <td
-        style={{
-          textAlign: "right",
-          fontFamily: "var(--mono)",
-          fontSize: 12,
-          color: f.chunks ? "var(--ink-2)" : "var(--muted-2)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {f.chunks || "—"}
       </td>
       <td>
         <div className="row-actions">
@@ -221,26 +208,26 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
               title="Re-embed this file"
             >
               <RotateCcw size={11} strokeWidth={1.5} />
-              Re-ingest
+              Reingest
             </button>
           )}
           <button
             type="button"
-            className="row-act"
+            className="row-act row-act-icon"
             onClick={onRename}
             title="Edit document"
             aria-label="Edit document"
           >
-            <Pencil size={11} strokeWidth={1.5} />
+            <Pencil size={12} strokeWidth={1.6} />
           </button>
           <button
             type="button"
-            className="row-act row-act-danger"
+            className="row-act row-act-icon row-act-danger"
             onClick={onRemove}
             title="Remove"
             aria-label="Remove"
           >
-            <Trash2 size={11} strokeWidth={1.5} />
+            <Trash2 size={12} strokeWidth={1.6} />
           </button>
         </div>
       </td>

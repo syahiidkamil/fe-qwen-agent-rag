@@ -8,6 +8,7 @@ import { AdminUsersPage } from "@/features/admin/users/AdminUsersPage";
 import { WorkspaceLayout } from "@/features/workspace/WorkspaceLayout";
 import { AiHelpPage } from "@/features/workspace/AiHelpPage";
 import { UserKnowledgePage } from "@/features/workspace/UserKnowledgePage";
+import { DocumentViewerPage } from "@/features/documents/DocumentViewerPage";
 import { RoleGuard, defaultRouteForRole } from "@/routes/RoleGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <AdminIndexRedirect /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
+          { path: "document/:id", element: <DocumentViewerPage /> },
           { path: "users", element: <AdminUsersPage /> },
           // Landing CMS (brand presets + chat-mode toggle) is super-admin only.
           {
@@ -56,6 +58,7 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="/workspace/ai-help" replace /> },
           { path: "ai-help", element: <AiHelpPage /> },
           { path: "knowledge", element: <UserKnowledgePage /> },
+          { path: "document/:id", element: <DocumentViewerPage /> },
         ],
       },
     ],
