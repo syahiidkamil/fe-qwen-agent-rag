@@ -1544,7 +1544,7 @@ a { color: inherit; text-decoration: none; }
 .file-icon[data-type="txt"]  { color: var(--muted); }
 
 .file-name { font-weight: 500; letter-spacing: -0.005em; }
-button.file-name-link {
+button.file-cell-link {
   background: none;
   border: 0;
   padding: 0;
@@ -1553,19 +1553,18 @@ button.file-name-link {
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  text-decoration: none;
-  transition: color .12s ease, text-decoration-color .12s ease;
-  text-underline-offset: 3px;
+  transition: color .12s ease;
+  border-radius: 6px;
 }
-button.file-name-link:hover {
+button.file-cell-link:hover .file-name {
   color: var(--teal-deep);
   text-decoration: underline;
   text-decoration-color: var(--teal-deep);
+  text-underline-offset: 3px;
 }
-button.file-name-link:focus-visible {
+button.file-cell-link:focus-visible {
   outline: 2px solid var(--teal);
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline-offset: 4px;
 }
 .file-sub {
   font-family: var(--mono);
@@ -2172,11 +2171,10 @@ a.cite:hover .ix { color: var(--teal-deep); }
   justify-content: center;
   gap: 8px;
   padding: 8px 0;
-  min-height: 80px;
+  min-height: 56px;
 }
 .is-collapsed .admin-side-brand {
-  padding: 0;
-  justify-content: center;
+  display: none;
 }
 .is-collapsed .admin-side-brand > span,
 .is-collapsed .admin-side-section,

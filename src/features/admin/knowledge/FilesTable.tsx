@@ -102,39 +102,47 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
   return (
     <tr>
       <td>
-        <div className="file-cell">
-          <FileIcon type={f.type} />
-          <div>
-            {f.status === "ingested" || f.status === "uploaded" ? (
-              <button
-                type="button"
-                className="file-name file-name-link"
-                onClick={() => void openDocument(f)}
-                title={`Open "${f.name}" in a new tab`}
-              >
-                {f.name}
-              </button>
-            ) : (
+        {f.status === "ingested" || f.status === "uploaded" ? (
+          <button
+            type="button"
+            className="file-cell file-cell-link"
+            onClick={() => void openDocument(f)}
+            title={`Open "${f.name}" in a new tab`}
+          >
+            <FileIcon type={f.type} />
+            <div>
               <div className="file-name">{f.name}</div>
-            )}
-            {f.error && (
-              <div className="file-sub" style={{ color: "var(--red)" }}>
-                {f.error}
-              </div>
-            )}
-            {!f.error && f.status === "ingested" && (
-              <div className="file-sub">
-                embedded · {f.chunks} chunks indexed · text-embed-3
-              </div>
-            )}
-            {!f.error && f.status === "uploaded" && (
-              <div className="file-sub">awaiting ingest</div>
-            )}
-            {!f.error && f.status === "ingesting" && (
-              <div className="file-sub">embedding · vectorizing · indexing</div>
-            )}
+              {f.error && (
+                <div className="file-sub" style={{ color: "var(--red)" }}>
+                  {f.error}
+                </div>
+              )}
+              {!f.error && f.status === "ingested" && (
+                <div className="file-sub">
+                  embedded · {f.chunks} chunks indexed · text-embed-3
+                </div>
+              )}
+              {!f.error && f.status === "uploaded" && (
+                <div className="file-sub">awaiting ingest</div>
+              )}
+            </div>
+          </button>
+        ) : (
+          <div className="file-cell">
+            <FileIcon type={f.type} />
+            <div>
+              <div className="file-name">{f.name}</div>
+              {f.error && (
+                <div className="file-sub" style={{ color: "var(--red)" }}>
+                  {f.error}
+                </div>
+              )}
+              {!f.error && f.status === "ingesting" && (
+                <div className="file-sub">embedding · vectorizing · indexing</div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </td>
       <td>
         <span className={`pill ${f.status}`}>

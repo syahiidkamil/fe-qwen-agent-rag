@@ -382,20 +382,18 @@ export function UserKnowledgePage() {
               {filteredFiles.map((f) => (
                 <tr key={f.id}>
                   <td>
-                    <div className="file-cell">
+                    <button
+                      type="button"
+                      className="file-cell file-cell-link"
+                      onClick={() => void openDocument(f.id, f.name)}
+                      title={`Open "${f.name}" in a new tab`}
+                    >
                       <FileIcon type={f.type} />
                       <div>
-                        <button
-                          type="button"
-                          className="file-name file-name-link"
-                          onClick={() => void openDocument(f.id, f.name)}
-                          title={`Open "${f.name}" in a new tab`}
-                        >
-                          {f.name}
-                        </button>
+                        <div className="file-name">{f.name}</div>
                         <div className="file-sub">embedded · {f.chunks} chunks</div>
                       </div>
-                    </div>
+                    </button>
                   </td>
                   <td>
                     {f.tags.length === 0 ? (
