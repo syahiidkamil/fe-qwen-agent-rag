@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
-import { LandingPage } from "@/features/landing/LandingPage";
+import { LandingRoute } from "@/features/landing/LandingRoute";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
@@ -21,7 +21,7 @@ function AdminIndexRedirect() {
 }
 
 const router = createBrowserRouter([
-  { path: "/", element: <LandingPage /> },
+  { path: "/", element: <LandingRoute /> },
   { path: "/login", element: <LoginPage /> },
   // Admin shell — admin AND super_admin can enter.
   {

@@ -2234,6 +2234,27 @@ a.cite:hover .ix { color: var(--teal-deep); }
   padding-bottom: 16px;
 }
 
+/* ========== Route-level loader (gates "/" while config loads) ========== */
+.route-loader {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  z-index: 50;
+}
+.route-loader-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid var(--rule);
+  border-top-color: var(--teal);
+  animation: route-loader-spin 0.7s linear infinite;
+}
+@keyframes route-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ========== AI Help full-page shell ========== */
 .ai-help-shell {
   /* Escape .admin-content's padding (32px top, var(--pad) horizontal, 100px

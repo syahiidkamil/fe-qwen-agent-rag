@@ -182,6 +182,53 @@ export function CmsForm() {
         )}
       </CollapsibleSection>
 
+      <CollapsibleSection ix="◐" title="Public landing visibility" defaultOpen>
+        <p
+          style={{
+            color: "var(--ink-2)",
+            fontSize: 13,
+            marginBottom: 12,
+            lineHeight: 1.5,
+          }}
+        >
+          When hidden, visiting <code>/</code> redirects straight to{" "}
+          <code>/login</code>. Useful for internal-only deployments where the
+          marketing page isn&apos;t meant for the public.
+        </p>
+        <label
+          style={{
+            display: "grid",
+            gridTemplateColumns: "auto 1fr",
+            gap: 10,
+            padding: "10px 12px",
+            border: "1px solid var(--line)",
+            borderRadius: 8,
+            cursor: "pointer",
+            background: config.landing_hidden
+              ? "rgba(31, 199, 174, 0.06)"
+              : "transparent",
+            borderColor: config.landing_hidden ? "var(--teal)" : "var(--line)",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={!!config.landing_hidden}
+            onChange={(e) => patchConfig({ landing_hidden: e.target.checked })}
+            style={{ marginTop: 3, accentColor: "var(--teal)" }}
+          />
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>
+              Hide public landing page
+            </div>
+            <div style={{ color: "var(--ink-2)", fontSize: 12.5, marginTop: 2 }}>
+              {config.landing_hidden
+                ? 'Anonymous visitors land on the sign-in page.'
+                : 'The marketing landing page is publicly reachable at "/".'}
+            </div>
+          </div>
+        </label>
+      </CollapsibleSection>
+
       <CollapsibleSection ix="01" title="Identity" defaultOpen>
         <label className="field">
           <div className="field-label">

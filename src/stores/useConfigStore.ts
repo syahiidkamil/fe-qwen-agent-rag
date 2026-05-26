@@ -14,6 +14,10 @@ interface ConfigState {
    *  Used by the CMS form to show "Currently: …" + dashed border when the
    *  in-memory radio differs from what's actually saved. */
   lastSavedChatMode: ChatMode | null;
+  /** Tracks the backend fetch lifecycle so route gates can show a loader
+   *  before deciding whether to render the landing page or redirect. Not
+   *  persisted — every page load starts from "idle". */
+  loadStatus: "idle" | "loading" | "loaded" | "error";
   setConfig: (next: LandingConfig) => void;
   patchConfig: (patch: DeepPartial<LandingConfig>) => void;
   resetConfig: () => void;
@@ -67,6 +71,7 @@ export const useConfigStore = create<ConfigState>()(
     (set, get) => ({
       config: DEFAULT_CONFIG,
       lastSavedChatMode: null,
+      loadStatus: "idle",
       setConfig: (next) => {
         applyTheme(next);
         set({ config: next });
@@ -116,6 +121,7 @@ export const useConfigStore = create<ConfigState>()(
           r.readAsText(file);
         }),
       loadFromBackend: async () => {
+        set({ loadStatus: "loading" });
         try {
           const { config } = await ConfigService.get();
           if (config) {
@@ -123,12 +129,16 @@ export const useConfigStore = create<ConfigState>()(
             set({
               config,
               lastSavedChatMode: config.chat_mode ?? "public",
+              loadStatus: "loaded",
             });
+          } else {
+            set({ loadStatus: "loaded" });
           }
         } catch (err) {
           // Network/backend unavailable — keep whatever's in local state.
           // eslint-disable-next-line no-console
           console.warn("ConfigService.get failed; using local state:", err);
+          set({ loadStatus: "error" });
         }
       },
       saveToBackend: async () => {

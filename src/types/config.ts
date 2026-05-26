@@ -110,6 +110,11 @@ export interface LandingConfig {
    *  super-admin in the Landing CMS. Defaults to "public" for backwards-
    *  compat with rows that pre-date the field. */
   chat_mode: ChatMode;
+  /** When true, "/" redirects straight to "/login" — the public landing
+   *  page is fully hidden. Toggled by super-admin in the Landing CMS.
+   *  Useful for internal/enterprise deployments where the marketing page
+   *  is not intended for the public. Defaults to false. */
+  landing_hidden?: boolean;
 }
 
 export type PresetId = "airanext" | "pulse" | "foyer";
