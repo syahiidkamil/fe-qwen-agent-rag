@@ -40,7 +40,17 @@ api.interceptors.response.use(
   (resp) => resp,
   (error: AxiosError<{ error?: { code: string; message: string; details?: unknown } }>) => {
     if (error.response) {
-      const payload = error.response.data?.error;
+      // FastAPI wraps HTTPException.detail as { detail: {...} }; we raise the
+      // {error: {code, message}} envelope inside that wrapper, so accept both
+      // top-level and detail-nested shapes.
+      const data = error.response.data as
+        | { error?: { code: string; message: string; details?: unknown } }
+        | { detail?: { error?: { code: string; message: string; details?: unknown } } }
+        | undefined;
+      const payload =
+        (data as { error?: { code: string; message: string; details?: unknown } })?.error ??
+        (data as { detail?: { error?: { code: string; message: string; details?: unknown } } })
+          ?.detail?.error;
       if (payload) {
         return Promise.reject(
           new ApiError(payload.code, payload.message, error.response.status, payload.details),
