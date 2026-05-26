@@ -9,7 +9,6 @@ export function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const config = useConfigStore((s) => s.config);
-  const email = useAuthStore((s) => s.email) ?? "ops@airanext.id";
   const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
   const totalFiles = useFilesStore((s) => s.files.length);
@@ -23,12 +22,6 @@ export function AdminSidebar() {
   };
 
   const isActive = (path: string) => location.pathname.startsWith(path);
-
-  const name = email.split("@")[0].split(/[._]/)[0];
-  const displayName = name
-    ? name.charAt(0).toUpperCase() + name.slice(1)
-    : "Staff";
-  const initial = displayName.charAt(0);
 
   return (
     <aside className="admin-side">
@@ -85,22 +78,16 @@ export function AdminSidebar() {
         <span>Users</span>
       </Link>
 
-      <div className="admin-user">
-        <div className="admin-user-av">{initial}</div>
-        <div className="admin-user-meta">
-          <div className="admin-user-name">{displayName}</div>
-          <div className="admin-user-mail">{email}</div>
-        </div>
-        <button
-          type="button"
-          className="admin-user-logout"
-          onClick={handleLogout}
-          title="Sign out"
-          aria-label="Sign out"
-        >
-          <LogOut size={13} strokeWidth={1.6} />
-        </button>
-      </div>
+      <button
+        type="button"
+        className="admin-side-logout"
+        onClick={handleLogout}
+        title="Sign out"
+        aria-label="Sign out"
+      >
+        <LogOut className="sl-icon" size={16} strokeWidth={1.8} />
+        <span>Sign out</span>
+      </button>
     </aside>
   );
 }

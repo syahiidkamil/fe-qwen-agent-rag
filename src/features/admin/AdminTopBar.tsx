@@ -1,4 +1,5 @@
 import { useLocation } from "react-router";
+import { UserPill } from "@/components/shared/UserPill";
 
 const CRUMBS: Record<string, string> = {
   "/admin/cms": "Landing CMS",
@@ -18,29 +19,7 @@ export function AdminTopBar() {
         <b>{label}</b>
       </div>
       <div className="admin-top-right">
-        <span
-          style={{
-            fontFamily: "var(--mono)",
-            fontSize: 11,
-            color: "var(--muted)",
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            padding: "0 8px",
-          }}
-        >
-          <span
-            style={{
-              display: "inline-block",
-              width: 6,
-              height: 6,
-              borderRadius: 99,
-              background: "var(--green)",
-              marginRight: 8,
-              verticalAlign: "middle",
-            }}
-          />
-          workspace · airanext
-        </span>
+        <UserPill />
       </div>
     </div>
   );

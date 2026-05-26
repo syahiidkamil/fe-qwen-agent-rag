@@ -9,7 +9,6 @@ export function WorkspaceSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const config = useConfigStore((s) => s.config);
-  const email = useAuthStore((s) => s.email) ?? "you@airanext.id";
   const logout = useAuthStore((s) => s.logout);
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -20,8 +19,6 @@ export function WorkspaceSidebar() {
   };
 
   const isActive = (path: string) => location.pathname.startsWith(path);
-  const displayName = email.split("@")[0].split(/[._]/)[0];
-  const initial = displayName ? displayName.charAt(0).toUpperCase() : "U";
 
   return (
     <aside className="admin-side">
@@ -67,22 +64,16 @@ export function WorkspaceSidebar() {
         <span>Knowledge base</span>
       </Link>
 
-      <div className="admin-user">
-        <div className="admin-user-av">{initial}</div>
-        <div className="admin-user-meta">
-          <div className="admin-user-name">{displayName || "You"}</div>
-          <div className="admin-user-mail">{email}</div>
-        </div>
-        <button
-          type="button"
-          className="admin-user-logout"
-          onClick={handleLogout}
-          aria-label="Sign out"
-          title="Sign out"
-        >
-          <LogOut size={13} strokeWidth={1.8} />
-        </button>
-      </div>
+      <button
+        type="button"
+        className="admin-side-logout"
+        onClick={handleLogout}
+        aria-label="Sign out"
+        title="Sign out"
+      >
+        <LogOut className="sl-icon" size={16} strokeWidth={1.8} />
+        <span>Sign out</span>
+      </button>
     </aside>
   );
 }
