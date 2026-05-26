@@ -1909,3 +1909,206 @@ a.cite:hover .ix { color: var(--teal-deep); }
   .land-hero { padding: 56px var(--pad) 72px; }
   .kb-meta-strip { grid-template-columns: 1fr; }
 }
+
+/* ========== Users management — modal + dialog primitives ========== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 22, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+.modal-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 12px 40px rgba(15, 18, 22, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+.modal-close {
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink-2);
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.modal-close:hover { color: var(--ink); border-color: var(--ink-2); }
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px 18px;
+}
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* Password reveal / copy affordance reused inside dialog inputs */
+.input-with-action {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.input-with-action .input { padding-right: 38px; }
+.input-action {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.input-action:hover { color: var(--ink); border-color: var(--rule); background: var(--paper-2, var(--paper)); }
+
+/* Role radios */
+.role-radios {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.role-radio {
+  display: grid;
+  grid-template-columns: 18px 90px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  font-size: 13.5px;
+  color: var(--ink);
+  cursor: pointer;
+  background: var(--paper);
+}
+.role-radio:has(input:checked) {
+  border-color: var(--teal-deep);
+  background: rgba(31, 199, 174, 0.06);
+}
+.role-radio input { accent-color: var(--teal); }
+.role-radio em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Post-create confirmation */
+.post-create-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--r-md);
+  color: #92400e;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.post-create-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.post-create-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.post-create-value-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.post-create-value {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 9px 38px 9px 11px;
+  background: var(--paper-2, var(--paper));
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  word-break: break-all;
+}
+.post-create-value-wrap .input-action {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Users page row chrome */
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.role-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink-2);
+}
+.role-tag[data-role="super_admin"] {
+  border-color: var(--teal-deep);
+  color: var(--teal-deep);
+  background: rgba(31, 199, 174, 0.06);
+}
+.role-tag[data-role="admin"] {
+  border-color: var(--ink-2);
+  color: var(--ink);
+}
+.role-tag[data-role="user"] {
+  border-color: var(--rule);
+  color: var(--ink-2);
+}

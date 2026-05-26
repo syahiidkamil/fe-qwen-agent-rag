@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut, FileText, Library, ExternalLink } from "lucide-react";
+import { LogOut, FileText, Library, ExternalLink, Users } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useFilesStore } from "@/stores/useFilesStore";
@@ -57,6 +57,14 @@ export function AdminSidebar() {
         <Library className="sl-icon" />
         <span>Knowledge base</span>
         <span className="sl-count">{totalFiles}</span>
+      </Link>
+      <Link
+        to="/admin/users"
+        className="admin-side-link"
+        data-active={isActive("/admin/users")}
+      >
+        <Users className="sl-icon" />
+        <span>Users</span>
       </Link>
 
       <div className="admin-side-section">Visit</div>

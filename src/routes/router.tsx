@@ -4,6 +4,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
 import { AdminKnowledgePage } from "@/features/admin/knowledge/AdminKnowledgePage";
+import { AdminUsersPage } from "@/features/admin/users/AdminUsersPage";
 import { WorkspacePage } from "@/features/workspace/WorkspacePage";
 import { RoleGuard, defaultRouteForRole } from "@/routes/RoleGuard";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <AdminIndexRedirect /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
+          { path: "users", element: <AdminUsersPage /> },
           // Landing CMS (brand presets + chat-mode toggle) is super-admin only.
           {
             element: <RoleGuard allowedRoles={["super_admin"]} />,

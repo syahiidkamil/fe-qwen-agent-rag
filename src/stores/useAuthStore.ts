@@ -16,6 +16,8 @@ function extractRole(session: Session | null): Role | null {
 interface AuthState {
   initialized: boolean;
   isAuthenticated: boolean;
+  /** Supabase auth user id (uuid). Stable across email changes; safer key. */
+  userId: string | null;
   email: string | null;
   role: Role | null;
   init: () => Promise<void>;
@@ -29,6 +31,7 @@ function applySession(
 ) {
   set({
     isAuthenticated: !!session,
+    userId: session?.user?.id ?? null,
     email: session?.user.email ?? null,
     role: extractRole(session),
   });
@@ -37,6 +40,7 @@ function applySession(
 export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
   isAuthenticated: false,
+  userId: null,
   email: null,
   role: null,
 
