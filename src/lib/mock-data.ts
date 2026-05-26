@@ -511,6 +511,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "3 days ago",
     chunks: 184,
     progress: 100,
+    tags: [],
   },
   {
     id: "f2",
@@ -521,6 +522,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "3 days ago",
     chunks: 62,
     progress: 100,
+    tags: [],
   },
   {
     id: "f3",
@@ -531,6 +533,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "yesterday",
     chunks: 41,
     progress: 100,
+    tags: [],
   },
   {
     id: "f4",
@@ -541,6 +544,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "1h ago",
     chunks: 0,
     progress: 0,
+    tags: [],
   },
   {
     id: "f5",
@@ -551,6 +555,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "32m ago",
     chunks: 0,
     progress: 0,
+    tags: [],
   },
   {
     id: "f6",
@@ -561,6 +566,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "just now",
     chunks: 0,
     progress: 47,
+    tags: [],
   },
   {
     id: "f7",
@@ -571,6 +577,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "5 days ago",
     chunks: 28,
     progress: 100,
+    tags: [],
   },
   {
     id: "f8",
@@ -581,6 +588,7 @@ export const SEED_FILES: KbFile[] = [
     uploaded: "yesterday",
     chunks: 0,
     progress: 0,
+    tags: [],
     error: "Encrypted PDF · password required",
   },
 ];

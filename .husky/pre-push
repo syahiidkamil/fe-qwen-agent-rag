@@ -1,0 +1,5 @@
+# Validate the FE build before pushing. tsc -b inside `npm run build` is
+# stricter than tsc --noEmit and catches type-level regressions across the
+# whole project graph (e.g. mock-data fixtures vs. updated types).
+echo "→ pre-push: running npm run build"
+npm run build
