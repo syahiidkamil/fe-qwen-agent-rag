@@ -2162,7 +2162,11 @@ a.cite:hover .ix { color: var(--teal-deep); }
   transition: padding 160ms ease;
 }
 .is-collapsed .admin-side {
-  padding: 24px 8px;
+  /* Match the expanded sidebar's vertical padding (0) so the header
+     border-bottom lines up with the topbar's bottom border at y=56
+     regardless of collapsed state. No cumulative layout shift when
+     the user toggles. */
+  padding: 0 8px;
   align-items: center;
 }
 .is-collapsed .admin-side-header {
