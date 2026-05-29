@@ -3,6 +3,9 @@ import { toast } from "sonner";
 import { Save } from "lucide-react";
 
 import {
+  RETRIEVAL_MAX_FILES_DEFAULT,
+  RETRIEVAL_MAX_FILES_MAX,
+  RETRIEVAL_MAX_FILES_MIN,
   RETRIEVAL_TOP_K_DEFAULT,
   RETRIEVAL_TOP_K_MAX,
   RETRIEVAL_TOP_K_MIN,
@@ -10,12 +13,22 @@ import {
 } from "@/services/SystemConfigService";
 
 /**
- * Admin-tunable infra knobs. Currently exposes retrieval top-K — the
- * number of chunks the chat pipeline pulls into the LLM context per
- * question. Stored in the singleton `system_config` row server-side.
+ * Admin-tunable infra knobs.
+ *
+ * - Chunk cap controls how many ranked passages the chat pipeline
+ *   forwards to the LLM (prompt budget).
+ * - File cap caps how many distinct source documents appear — applied
+ *   after RRF ranking, in rank order. Stops one document from
+ *   dominating the context and keeps the source-chip list focused.
  */
+function clamp(value: number, lo: number, hi: number, fallback: number): number {
+  const n = Math.round(value || fallback);
+  return Math.max(lo, Math.min(hi, n));
+}
+
 export function AdminSystemConfigPage() {
   const [topK, setTopK] = useState<number>(RETRIEVAL_TOP_K_DEFAULT);
+  const [maxFiles, setMaxFiles] = useState<number>(RETRIEVAL_MAX_FILES_DEFAULT);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
@@ -29,6 +42,11 @@ export function AdminSystemConfigPage() {
             ? config.retrieval_top_k
             : RETRIEVAL_TOP_K_DEFAULT,
         );
+        setMaxFiles(
+          typeof config.retrieval_max_files === "number"
+            ? config.retrieval_max_files
+            : RETRIEVAL_MAX_FILES_DEFAULT,
+        );
         setUpdatedAt(updatedAt);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Could not load system config";
@@ -39,17 +57,30 @@ export function AdminSystemConfigPage() {
     })();
   }, []);
 
-  const clamped = Math.max(
+  const clampedTopK = clamp(
+    topK,
     RETRIEVAL_TOP_K_MIN,
-    Math.min(RETRIEVAL_TOP_K_MAX, Math.round(topK || RETRIEVAL_TOP_K_DEFAULT)),
+    RETRIEVAL_TOP_K_MAX,
+    RETRIEVAL_TOP_K_DEFAULT,
   );
-  const outOfRange = clamped !== topK;
+  const clampedMaxFiles = clamp(
+    maxFiles,
+    RETRIEVAL_MAX_FILES_MIN,
+    RETRIEVAL_MAX_FILES_MAX,
+    RETRIEVAL_MAX_FILES_DEFAULT,
+  );
+  const topKOutOfRange = clampedTopK !== topK;
+  const maxFilesOutOfRange = clampedMaxFiles !== maxFiles;
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await SystemConfigService.save({ retrieval_top_k: clamped });
-      setTopK(clamped);
+      await SystemConfigService.save({
+        retrieval_top_k: clampedTopK,
+        retrieval_max_files: clampedMaxFiles,
+      });
+      setTopK(clampedTopK);
+      setMaxFiles(clampedMaxFiles);
       const fresh = await SystemConfigService.get();
       setUpdatedAt(fresh.updatedAt);
       toast.success("System config saved");
@@ -72,10 +103,9 @@ export function AdminSystemConfigPage() {
 
       <div style={{ maxWidth: 640 }}>
         <p style={{ color: "var(--ink-2)", fontSize: 13, lineHeight: 1.5, marginBottom: 20 }}>
-          How many of the top-ranked knowledge-base chunks the chat pipeline
-          forwards into the LLM context for each question. Higher = more
-          recall but longer prompts; lower = tighter context, faster, but
-          may miss relevant passages.
+          The retrieval pipeline ranks knowledge-base chunks for each chat
+          question. These two caps control how much makes it into the LLM
+          context and how focused the citation list stays.
         </p>
 
         <label className="field">
@@ -93,13 +123,39 @@ export function AdminSystemConfigPage() {
               style={{ width: 120 }}
             />
             <span style={{ color: "var(--muted)", fontSize: 12 }}>
-              allowed {RETRIEVAL_TOP_K_MIN}–{RETRIEVAL_TOP_K_MAX} · default{" "}
-              {RETRIEVAL_TOP_K_DEFAULT}
+              {RETRIEVAL_TOP_K_MIN}–{RETRIEVAL_TOP_K_MAX} · default {RETRIEVAL_TOP_K_DEFAULT} ·
+              caps prompt budget
             </span>
           </div>
-          {outOfRange && (
+          {topKOutOfRange && (
             <div className="field-error">
-              Out of range — will be saved as {clamped}.
+              Out of range — will be saved as {clampedTopK}.
+            </div>
+          )}
+        </label>
+
+        <label className="field">
+          <div className="field-label">Max distinct files cited per answer</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <input
+              type="number"
+              min={RETRIEVAL_MAX_FILES_MIN}
+              max={RETRIEVAL_MAX_FILES_MAX}
+              step={1}
+              value={loaded ? maxFiles : ""}
+              disabled={!loaded || saving}
+              onChange={(e) => setMaxFiles(Number(e.target.value))}
+              className="input"
+              style={{ width: 120 }}
+            />
+            <span style={{ color: "var(--muted)", fontSize: 12 }}>
+              {RETRIEVAL_MAX_FILES_MIN}–{RETRIEVAL_MAX_FILES_MAX} · default{" "}
+              {RETRIEVAL_MAX_FILES_DEFAULT} · caps citation diversity
+            </span>
+          </div>
+          {maxFilesOutOfRange && (
+            <div className="field-error">
+              Out of range — will be saved as {clampedMaxFiles}.
             </div>
           )}
         </label>
