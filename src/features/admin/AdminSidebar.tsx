@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut, FileText, Library, Users, PanelLeft, PanelLeftClose } from "lucide-react";
+import { LogOut, FileText, Library, Users, Sparkles, Sliders, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useFilesStore } from "@/stores/useFilesStore";
@@ -61,6 +61,14 @@ export function AdminSidebar() {
         </Link>
       )}
       <Link
+        to="/admin/ai-help"
+        className="admin-side-link"
+        data-active={isActive("/admin/ai-help")}
+      >
+        <Sparkles className="sl-icon" />
+        <span>AI Help</span>
+      </Link>
+      <Link
         to="/admin/knowledge"
         className="admin-side-link"
         data-active={isActive("/admin/knowledge")}
@@ -76,6 +84,14 @@ export function AdminSidebar() {
       >
         <Users className="sl-icon" />
         <span>Users</span>
+      </Link>
+      <Link
+        to="/admin/system-config"
+        className="admin-side-link"
+        data-active={isActive("/admin/system-config")}
+      >
+        <Sliders className="sl-icon" />
+        <span>System config</span>
       </Link>
 
       <button

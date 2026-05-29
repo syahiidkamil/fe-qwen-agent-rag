@@ -4,6 +4,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { AdminCmsPage } from "@/features/admin/cms/AdminCmsPage";
 import { AdminKnowledgePage } from "@/features/admin/knowledge/AdminKnowledgePage";
+import { AdminSystemConfigPage } from "@/features/admin/system-config/AdminSystemConfigPage";
 import { AdminUsersPage } from "@/features/admin/users/AdminUsersPage";
 import { WorkspaceLayout } from "@/features/workspace/WorkspaceLayout";
 import { AiHelpPage } from "@/features/workspace/AiHelpPage";
@@ -33,9 +34,11 @@ const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { index: true, element: <AdminIndexRedirect /> },
+          { path: "ai-help", element: <AiHelpPage /> },
           { path: "knowledge", element: <AdminKnowledgePage /> },
           { path: "document/:id", element: <DocumentViewerPage /> },
           { path: "users", element: <AdminUsersPage /> },
+          { path: "system-config", element: <AdminSystemConfigPage /> },
           // Landing CMS (brand presets + chat-mode toggle) is super-admin only.
           {
             element: <RoleGuard allowedRoles={["super_admin"]} />,

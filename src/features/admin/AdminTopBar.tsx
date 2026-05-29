@@ -3,8 +3,10 @@ import { UserPill } from "@/components/shared/UserPill";
 
 const CRUMBS: Record<string, string> = {
   "/admin/cms": "Landing CMS",
+  "/admin/ai-help": "AI Help",
   "/admin/knowledge": "Knowledge base",
   "/admin/users": "Users",
+  "/admin/system-config": "System config",
 };
 
 export function AdminTopBar() {
