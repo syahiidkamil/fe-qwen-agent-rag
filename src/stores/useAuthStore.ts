@@ -23,6 +23,9 @@ interface AuthState {
   init: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  /** Re-pull the session — used after a self email change so the header
+   *  reflects the new address without a re-login. */
+  refresh: () => Promise<void>;
 }
 
 function applySession(
@@ -64,5 +67,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   async logout() {
     await supabase.auth.signOut();
     applySession(set, null);
+  },
+
+  async refresh() {
+    // refreshSession exchanges the refresh token for a new one whose user
+    // object carries the latest email; onAuthStateChange also fires, but we
+    // apply it here too so the update is synchronous for the caller.
+    const { data } = await supabase.auth.refreshSession();
+    applySession(set, data.session);
   },
 }));

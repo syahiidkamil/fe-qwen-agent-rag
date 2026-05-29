@@ -9,6 +9,8 @@ interface UsersState {
   loading: boolean;
   refresh: () => Promise<void>;
   create: (input: CreateUserInput) => Promise<ManagedUser>;
+  updateEmail: (id: string, email: string) => Promise<ManagedUser>;
+  remove: (id: string) => Promise<void>;
   deactivate: (id: string) => Promise<void>;
   reactivate: (id: string) => Promise<void>;
 }
@@ -40,6 +42,22 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     const created = await UserService.create(input);
     set({ users: [created, ...get().users] });
     return created;
+  },
+
+  async updateEmail(id, email) {
+    // Throws on failure so the dialog surfaces inline errors (matches `create`).
+    // On success, replace the row in place — same optimistic pattern as
+    // deactivate/reactivate, so no full refresh is needed.
+    const updated = await UserService.updateEmail(id, email);
+    set((s) => ({ users: s.users.map((u) => (u.id === id ? updated : u)) }));
+    return updated;
+  },
+
+  async remove(id) {
+    // Throws on failure so the confirm dialog surfaces inline errors (e.g. a
+    // server-side super_admin guard). On success, drop the row from the list.
+    await UserService.remove(id);
+    set((s) => ({ users: s.users.filter((u) => u.id !== id) }));
   },
 
   async deactivate(id) {

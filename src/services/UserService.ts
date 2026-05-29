@@ -28,6 +28,14 @@ export const UserService = {
     return data.data;
   },
 
+  async updateEmail(id: string, email: string): Promise<ManagedUser> {
+    const { data } = await api.patch<{ data: ManagedUser }>(
+      `/api/users/${id}`,
+      { email },
+    );
+    return data.data;
+  },
+
   async deactivate(id: string): Promise<ManagedUser> {
     const { data } = await api.patch<{ data: ManagedUser }>(
       `/api/users/${id}/deactivate`,
@@ -40,5 +48,10 @@ export const UserService = {
       `/api/users/${id}/reactivate`,
     );
     return data.data;
+  },
+
+  async remove(id: string): Promise<void> {
+    // Hard delete — 204 No Content, no body to unwrap.
+    await api.delete(`/api/users/${id}`);
   },
 };
