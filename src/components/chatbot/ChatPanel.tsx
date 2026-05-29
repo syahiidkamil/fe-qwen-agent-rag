@@ -3,7 +3,6 @@ import { Link } from "react-router";
 import { Lock, RotateCcw, Send, X } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
-import { useFilesStore } from "@/stores/useFilesStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { MessageBubble } from "@/components/chatbot/MessageBubble";
 import { MarkdownText } from "@/components/chatbot/MarkdownText";
@@ -29,9 +28,6 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
   const reset = useChatStore((s) => s.reset);
   const streaming = useChatStore((s) => s.streaming);
   const gated = useChatStore((s) => s.gated);
-  const indexedCount = useFilesStore(
-    (s) => s.files.filter((f) => f.status === "ingested").length,
-  );
 
   // Show the "Sign in to chat" card when chat_mode is internal and we're
   // anonymous, OR when a previous send got blocked by the BE 401 gate.
@@ -76,11 +72,7 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
         <div className="chat-avatar">{widget.initial}</div>
         <div className="chat-head-text">
           <div className="chat-name">{widget.name}</div>
-          <div className="chat-status">
-            {indexedCount > 0
-              ? `grounded · ${indexedCount} ${indexedCount === 1 ? "source" : "sources"} indexed`
-              : "ai agent helper"}
-          </div>
+          <div className="chat-status">ai agent helper</div>
         </div>
         <button
           type="button"
@@ -173,7 +165,7 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
         <>
           {showSuggestions && widget.suggestions.length > 0 && (
             <div className="chat-suggestions">
-              <div className="chat-suggestions-label">Try asking</div>
+              <div className="chat-suggestions-label">Coba tanyakan</div>
               {widget.suggestions.slice(0, 4).map((s, i) => (
                 <button
                   type="button"
@@ -193,7 +185,7 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKey}
-              placeholder={`Ask anything about ${widget.name}…`}
+              placeholder={`Tanyakan apa saja tentang ${widget.name}…`}
               rows={1}
             />
             <button
