@@ -1,8 +1,11 @@
 import { create } from "zustand";
 
 import { streamChat, type ChatStreamMessage, type SourceRef } from "@/services/ChatService";
-import type { ChatMessage } from "@/types/chat";
+import { SessionService } from "@/services/SessionService";
+import { sourcesToChat } from "@/lib/chat-sources";
+import type { ChatMessage, ChatSession } from "@/types/chat";
 import { useConfigStore } from "@/stores/useConfigStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface ChatState {
   sessionId: string | null;
@@ -17,10 +20,20 @@ interface ChatState {
    *  The widget shows the "Sign in to chat" gate over the existing
    *  conversation (greyed) until the user signs in or resets. */
   gated: boolean;
+  /** The signed-in user's saved sessions, for the AI Help sidebar. Empty
+   *  for anonymous visitors (the public widget never lists sessions). */
+  sessions: ChatSession[];
+  sessionsLoading: boolean;
   setDraft: (s: string) => void;
   send: (text?: string) => Promise<void>;
   reset: () => void;
   clearGate: () => void;
+  /** Load the current user's session list (no-op when anonymous). */
+  loadSessions: () => Promise<void>;
+  /** Replace the active conversation with a saved session's history. */
+  openSession: (id: string) => Promise<void>;
+  renameSession: (id: string, title: string) => Promise<void>;
+  deleteSession: (id: string) => Promise<void>;
 }
 
 function welcomeMessage(): ChatMessage {
@@ -28,25 +41,10 @@ function welcomeMessage(): ChatMessage {
   return { id: "m0", role: "bot", text: welcome };
 }
 
-function sourcesToChat(refs: SourceRef[]): ChatMessage["sources"] {
-  // Dedupe by document_id; prefer the real filename when the backend supplied one.
-  const seen = new Set<string>();
-  const out: NonNullable<ChatMessage["sources"]> = [];
-  for (const r of refs) {
-    if (seen.has(r.document_id)) continue;
-    seen.add(r.document_id);
-    out.push({
-      id: r.document_id,
-      name: r.filename || `doc-${r.document_id.slice(0, 6)}`,
-      url: r.url ?? undefined,
-    });
-  }
-  return out;
-}
-
 /**
  * Chat state is intentionally NOT persisted. The widget starts fresh on
- * every page load — same expectation as ChatGPT/Claude's "New chat".
+ * every page load — same expectation as ChatGPT/Claude's "New chat". For
+ * signed-in users the AI Help sidebar surfaces past sessions to reopen.
  */
 export const useChatStore = create<ChatState>((set, get) => ({
   sessionId: null,
@@ -56,6 +54,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   streaming: "",
   pendingSources: [],
   gated: false,
+  sessions: [],
+  sessionsLoading: false,
 
   setDraft: (s) => set({ draft: s }),
 
@@ -124,6 +124,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
             streaming: "",
             pendingSources: [],
           });
+          // Refresh the sidebar so a freshly-created session shows up with
+          // its auto-title and the list re-sorts by recent activity.
+          // Self-guards on auth, so it's a no-op for anonymous visitors.
+          void get().loadSessions();
         },
         onError: (err) => {
           const botMsg: ChatMessage = {
@@ -164,6 +168,51 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }),
 
   clearGate: () => set({ gated: false }),
+
+  async loadSessions() {
+    if (!useAuthStore.getState().isAuthenticated) return;
+    set({ sessionsLoading: true });
+    try {
+      const sessions = await SessionService.list();
+      set({ sessions, sessionsLoading: false });
+    } catch {
+      // Keep whatever's listed; the sidebar shows its last-known state.
+      set({ sessionsLoading: false });
+    }
+  },
+
+  async openSession(id) {
+    if (get().sessionId === id || get().typing) return;
+    try {
+      const { messages } = await SessionService.get(id);
+      set({
+        sessionId: id,
+        // Prepend the welcome bubble so a reopened conversation reads the
+        // same as a live one; it's filtered out of wire history on resend.
+        messages: [welcomeMessage(), ...messages],
+        draft: "",
+        typing: false,
+        streaming: "",
+        pendingSources: [],
+        gated: false,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn("openSession failed:", err);
+    }
+  },
+
+  async renameSession(id, title) {
+    const updated = await SessionService.rename(id, title);
+    set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
+  },
+
+  async deleteSession(id) {
+    await SessionService.remove(id);
+    set({ sessions: get().sessions.filter((s) => s.id !== id) });
+    // If the open conversation was the one deleted, fall back to a new chat.
+    if (get().sessionId === id) get().reset();
+  },
 }));
 
 useConfigStore.subscribe((s, prev) => {
