@@ -9,16 +9,10 @@ import { DocumentService } from "@/services/DocumentService";
 import { EditDocumentDialog } from "@/features/admin/knowledge/EditDocumentDialog";
 
 async function openDocument(file: KbFile) {
-  // Open the tab synchronously so the browser counts it as user-initiated;
-  // navigate it to the signed URL once the API call returns. If we awaited
-  // first, Safari/Firefox would block the window.open() as a popup.
-  const tab = window.open("about:blank", "_blank", "noopener");
   try {
     const url = await DocumentService.getViewUrl(file.id);
-    if (tab) tab.location.href = url;
-    else window.open(url, "_blank", "noopener");
+    window.open(url, "_blank", "noopener,noreferrer");
   } catch (err) {
-    if (tab) tab.close();
     const msg = err instanceof Error ? err.message : "Could not open document";
     toast.error(msg);
   }

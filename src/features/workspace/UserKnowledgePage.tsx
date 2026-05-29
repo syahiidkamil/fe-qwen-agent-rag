@@ -18,14 +18,10 @@ import { DocumentService } from "@/services/DocumentService";
  * it (a query for a tag name surfaces the chunks that mention it).
  */
 async function openDocument(id: string, name: string) {
-  // Open the tab synchronously so popup blockers treat it as user-initiated.
-  const tab = window.open("about:blank", "_blank", "noopener");
   try {
     const url = await DocumentService.getViewUrl(id);
-    if (tab) tab.location.href = url;
-    else window.open(url, "_blank", "noopener");
+    window.open(url, "_blank", "noopener,noreferrer");
   } catch (err) {
-    if (tab) tab.close();
     const msg = err instanceof Error ? err.message : `Could not open ${name}`;
     toast.error(msg);
   }
