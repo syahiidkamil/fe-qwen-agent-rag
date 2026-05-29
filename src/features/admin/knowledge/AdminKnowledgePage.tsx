@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useFilesStore } from "@/stores/useFilesStore";
+import { useConfigStore } from "@/stores/useConfigStore";
 import type { KbFileStatus } from "@/types/file";
 import { Dropzone } from "@/features/admin/knowledge/Dropzone";
 import { FilesToolbar } from "@/features/admin/knowledge/FilesToolbar";
@@ -11,6 +12,7 @@ export function AdminKnowledgePage() {
   const files = useFilesStore((s) => s.files);
   const startIngest = useFilesStore((s) => s.startIngest);
   const refresh = useFilesStore((s) => s.refresh);
+  const brand = useConfigStore((s) => s.config.brand);
 
   useEffect(() => {
     void refresh();
@@ -42,7 +44,7 @@ export function AdminKnowledgePage() {
       <div className="page-head">
         <div>
           <span className="eyebrow">Knowledge base</span>
-          <h1 className="page-title">Ingest the corpus that powers Aira</h1>
+          <h1 className="page-title">Ingest the corpus that powers {brand}</h1>
         </div>
         <div className="page-actions">
           {pendingCount > 0 && (

@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import { useFilesStore } from "@/stores/useFilesStore";
+import { useConfigStore } from "@/stores/useConfigStore";
 import { FileIcon } from "@/components/shared/FileIcon";
 import { KbSearch } from "@/components/shared/KbSearch";
 import { fmtBytes } from "@/lib/format";
@@ -34,6 +35,7 @@ export function UserKnowledgePage() {
   const files = useFilesStore((s) => s.files);
   const loading = useFilesStore((s) => s.loading);
   const refresh = useFilesStore((s) => s.refresh);
+  const brand = useConfigStore((s) => s.config.brand);
 
   useEffect(() => {
     void refresh();
@@ -49,7 +51,7 @@ export function UserKnowledgePage() {
       <div className="page-head">
         <div>
           <span className="eyebrow">Knowledge base</span>
-          <h1 className="page-title">What Aira can read for you</h1>
+          <h1 className="page-title">What {brand} can read for you</h1>
         </div>
       </div>
 

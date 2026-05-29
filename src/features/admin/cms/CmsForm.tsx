@@ -96,7 +96,7 @@ export function CmsForm() {
             {
               value: "public",
               title: "Public",
-              hint: "Anyone can chat with Aira from the marketing landing page.",
+              hint: `Anyone can chat with ${config.widget.name} from the marketing landing page.`,
             },
             {
               value: "internal",
