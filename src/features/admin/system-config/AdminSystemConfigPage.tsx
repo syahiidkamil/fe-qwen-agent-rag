@@ -6,7 +6,6 @@ import {
   RELEVANCE_THRESHOLD_DEFAULT,
   RELEVANCE_THRESHOLD_MAX,
   RELEVANCE_THRESHOLD_MIN,
-  RELEVANCE_THRESHOLD_STEP,
   RETRIEVAL_MAX_FILES_DEFAULT,
   RETRIEVAL_MAX_FILES_MAX,
   RETRIEVAL_MAX_FILES_MIN,
@@ -40,11 +39,38 @@ function clampFloat(value: number, lo: number, hi: number, fallback: number): nu
   return Math.max(lo, Math.min(hi, n));
 }
 
+/** Round to 2 decimal places — the threshold's max precision. */
+function round2(n: number): number {
+  return Math.round((Number.isFinite(n) ? n : 0) * 100) / 100;
+}
+
+/**
+ * Sanitize raw text for the threshold field: normalize a comma to a dot (so the
+ * value never renders with a locale-specific comma), keep a single decimal
+ * point, and cap at 2 decimal places. A lone trailing dot is preserved so the
+ * field stays typeable mid-entry.
+ */
+function sanitizeDecimal2(raw: string): string {
+  let s = raw.replace(",", ".").replace(/[^0-9.]/g, "");
+  const dot = s.indexOf(".");
+  if (dot !== -1) {
+    const intPart = s.slice(0, dot);
+    const decPart = s.slice(dot + 1).replace(/\./g, "").slice(0, 2);
+    s = `${intPart}.${decPart}`;
+  }
+  return s;
+}
+
+/** Render a numeric threshold as text with a dot separator, at most 2 decimals. */
+function formatThreshold(n: number): string {
+  return String(round2(n));
+}
+
 export function AdminSystemConfigPage() {
   const [topK, setTopK] = useState<number>(RETRIEVAL_TOP_K_DEFAULT);
   const [maxFiles, setMaxFiles] = useState<number>(RETRIEVAL_MAX_FILES_DEFAULT);
-  const [relevanceThreshold, setRelevanceThreshold] = useState<number>(
-    RELEVANCE_THRESHOLD_DEFAULT,
+  const [thresholdText, setThresholdText] = useState<string>(
+    formatThreshold(RELEVANCE_THRESHOLD_DEFAULT),
   );
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -64,10 +90,12 @@ export function AdminSystemConfigPage() {
             ? config.retrieval_max_files
             : RETRIEVAL_MAX_FILES_DEFAULT,
         );
-        setRelevanceThreshold(
-          typeof config.relevance_threshold === "number"
-            ? config.relevance_threshold
-            : RELEVANCE_THRESHOLD_DEFAULT,
+        setThresholdText(
+          formatThreshold(
+            typeof config.relevance_threshold === "number"
+              ? config.relevance_threshold
+              : RELEVANCE_THRESHOLD_DEFAULT,
+          ),
         );
         setUpdatedAt(updatedAt);
       } catch (err) {
@@ -91,15 +119,22 @@ export function AdminSystemConfigPage() {
     RETRIEVAL_MAX_FILES_MAX,
     RETRIEVAL_MAX_FILES_DEFAULT,
   );
-  const clampedRelevanceThreshold = clampFloat(
-    relevanceThreshold,
-    RELEVANCE_THRESHOLD_MIN,
-    RELEVANCE_THRESHOLD_MAX,
-    RELEVANCE_THRESHOLD_DEFAULT,
+  const parsedThreshold =
+    thresholdText.trim() === "" || thresholdText.trim() === "."
+      ? RELEVANCE_THRESHOLD_DEFAULT
+      : Number(thresholdText);
+  const clampedRelevanceThreshold = round2(
+    clampFloat(
+      parsedThreshold,
+      RELEVANCE_THRESHOLD_MIN,
+      RELEVANCE_THRESHOLD_MAX,
+      RELEVANCE_THRESHOLD_DEFAULT,
+    ),
   );
   const topKOutOfRange = clampedTopK !== topK;
   const maxFilesOutOfRange = clampedMaxFiles !== maxFiles;
-  const relevanceThresholdOutOfRange = clampedRelevanceThreshold !== relevanceThreshold;
+  const relevanceThresholdOutOfRange =
+    Number.isFinite(parsedThreshold) && clampedRelevanceThreshold !== parsedThreshold;
 
   const handleSave = async () => {
     setSaving(true);
@@ -111,7 +146,7 @@ export function AdminSystemConfigPage() {
       });
       setTopK(clampedTopK);
       setMaxFiles(clampedMaxFiles);
-      setRelevanceThreshold(clampedRelevanceThreshold);
+      setThresholdText(formatThreshold(clampedRelevanceThreshold));
       const fresh = await SystemConfigService.get();
       setUpdatedAt(fresh.updatedAt);
       toast.success("System config saved");
@@ -196,19 +231,21 @@ export function AdminSystemConfigPage() {
           <div className="field-label">Relevance threshold</div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <input
-              type="number"
-              min={RELEVANCE_THRESHOLD_MIN}
-              max={RELEVANCE_THRESHOLD_MAX}
-              step={RELEVANCE_THRESHOLD_STEP}
-              value={loaded ? relevanceThreshold : ""}
+              type="text"
+              inputMode="decimal"
+              lang="en-US"
+              value={loaded ? thresholdText : ""}
               disabled={!loaded || saving}
-              onChange={(e) => setRelevanceThreshold(Number(e.target.value))}
+              onChange={(e) => setThresholdText(sanitizeDecimal2(e.target.value))}
+              onBlur={() => setThresholdText(formatThreshold(clampedRelevanceThreshold))}
               className="input"
               style={{ width: 120 }}
+              placeholder="0"
+              aria-label="Relevance threshold, 0 to 1, up to 2 decimals"
             />
             <span style={{ color: "var(--muted)", fontSize: 12 }}>
-              {RELEVANCE_THRESHOLD_MIN}–{RELEVANCE_THRESHOLD_MAX} · default{" "}
-              {RELEVANCE_THRESHOLD_DEFAULT} · 0 disables filtering
+              {RELEVANCE_THRESHOLD_MIN}–{RELEVANCE_THRESHOLD_MAX} · max 2 decimals ·
+              default {RELEVANCE_THRESHOLD_DEFAULT} · 0 disables filtering
             </span>
           </div>
           <div style={{ color: "var(--muted)", fontSize: 12, marginTop: 6, lineHeight: 1.5 }}>
