@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { useUiStore } from "@/stores/useUiStore";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 export function AdminSidebar() {
   const location = useLocation();
@@ -27,11 +28,7 @@ export function AdminSidebar() {
     <aside className="admin-side">
       <div className="admin-side-header">
         <Link to="/" className="admin-side-brand">
-          <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
-            <rect x="1" y="1" width="24" height="24" rx="6" fill="var(--ink)" />
-            <path d="M13 5L20 19H17.5L13 9.5L8.5 19H6L13 5Z" fill="#fff" />
-            <circle cx="13" cy="19.5" r="2" fill="var(--teal-bright)" />
-          </svg>
+          <BrandMark size={22} />
           <span>{config.brand}</span>
         </Link>
         <button

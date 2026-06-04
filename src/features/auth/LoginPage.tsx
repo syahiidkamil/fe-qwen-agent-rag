@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { defaultRouteForRole } from "@/routes/RoleGuard";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -144,28 +145,7 @@ export function LoginPage() {
 
         <div className="login-side-foot">
           <Link to="/" className="login-side-brand" style={{ color: "#fff" }}>
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 26 26"
-              fill="none"
-              aria-hidden="true"
-            >
-              <rect
-                x="1"
-                y="1"
-                width="24"
-                height="24"
-                rx="6"
-                fill="rgba(255,255,255,0.12)"
-                stroke="rgba(255,255,255,0.2)"
-              />
-              <path
-                d="M13 5L20 19H17.5L13 9.5L8.5 19H6L13 5Z"
-                fill="#FFFFFF"
-              />
-              <circle cx="13" cy="19.5" r="2" fill="#1FC7AE" />
-            </svg>
+            <BrandMark size={26} />
             <span>{brand}</span>
           </Link>
 

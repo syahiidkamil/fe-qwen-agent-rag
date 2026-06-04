@@ -115,6 +115,11 @@ export interface LandingConfig {
    *  Useful for internal/enterprise deployments where the marketing page
    *  is not intended for the public. Defaults to false. */
   landing_hidden?: boolean;
+  /** Public URL of an uploaded company logo. When set (non-empty), it
+   *  overrides the default inline-SVG brand mark for EVERY user. Persisted
+   *  server-side via POST/DELETE /api/branding/logo, which writes this field
+   *  into the landing-config blob. Undefined/empty falls back to the SVG. */
+  logo_url?: string;
 }
 
 export type PresetId = "airanext" | "pulse" | "foyer";

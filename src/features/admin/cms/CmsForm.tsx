@@ -1,6 +1,7 @@
 import type { LandingConfig } from "@/types/config";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { CollapsibleSection } from "@/features/admin/cms/CollapsibleSection";
+import { CmsLogoField } from "@/features/admin/cms/CmsLogoField";
 
 const ACCENT_OPTIONS = [
   { id: "teal", color: "#0E8C7E" },
@@ -230,6 +231,7 @@ export function CmsForm() {
       </CollapsibleSection>
 
       <CollapsibleSection ix="01" title="Identity" defaultOpen>
+        <CmsLogoField />
         <label className="field">
           <div className="field-label">
             <span>Brand name</span>

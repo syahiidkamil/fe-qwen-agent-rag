@@ -1,8 +1,38 @@
+import { useConfigStore } from "@/stores/useConfigStore";
+
 interface BrandMarkProps {
   size?: number;
 }
 
+/**
+ * The brand logo. Pure presentational: reads the super-admin-uploaded
+ * `logo_url` from the config store and, when present, renders that image in
+ * place of the default inline-SVG mark — so a single upload overrides the
+ * logo for every user, everywhere this component is used.
+ */
 export function BrandMark({ size = 26 }: BrandMarkProps) {
+  const logoUrl = useConfigStore((s) => s.config.logo_url);
+  const brand = useConfigStore((s) => s.config.brand);
+
+  if (typeof logoUrl === "string" && logoUrl.length > 0) {
+    return (
+      <img
+        src={logoUrl}
+        alt={brand || "Logo"}
+        style={{
+          height: size,
+          width: "auto",
+          // Non-square logos (wordmarks) stay legible without blowing out the
+          // layout; tall/wide ones are clamped and letterboxed via contain.
+          maxWidth: size * 3,
+          objectFit: "contain",
+          display: "block",
+          borderRadius: 6,
+        }}
+      />
+    );
+  }
+
   return (
     <svg
       width={size}
