@@ -23,6 +23,7 @@ export function sourcesToChat(refs: SourceRef[]): ChatSource[] {
       id: r.document_id,
       name: r.filename || `doc-${r.document_id.slice(0, 6)}`,
       url: r.url ?? undefined,
+      score: r.score,
       similarity: r.similarity ?? undefined,
     });
   }

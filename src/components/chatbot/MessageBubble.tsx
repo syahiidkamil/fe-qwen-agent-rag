@@ -35,15 +35,25 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             const label = (
               <>
                 <span className="ix">[{i + 1}]</span> {truncate(s.name)}
-                {showDebug && typeof s.similarity === "number" && (
-                  <span
-                    className="msg-time"
-                    style={{ marginLeft: 4 }}
-                    title="Cosine similarity to your question (0–1)"
-                  >
-                    {s.similarity.toFixed(2)}
-                  </span>
-                )}
+                {showDebug &&
+                  (typeof s.score === "number" || typeof s.similarity === "number") && (
+                    <span className="msg-time" style={{ marginLeft: 4 }}>
+                      {typeof s.score === "number" && (
+                        <span title="Reciprocal Rank Fusion score — drives ranking">
+                          rrf {s.score.toFixed(4)}
+                        </span>
+                      )}
+                      {typeof s.score === "number" &&
+                        typeof s.similarity === "number" && (
+                          <span style={{ opacity: 0.5 }}> · </span>
+                        )}
+                      {typeof s.similarity === "number" && (
+                        <span title="Cosine similarity to your question (0–1) — the relevance gate">
+                          sim {s.similarity.toFixed(2)}
+                        </span>
+                      )}
+                    </span>
+                  )}
               </>
             );
             return s.url ? (
