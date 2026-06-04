@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
 
@@ -12,6 +12,7 @@ import {
   RETRIEVAL_TOP_K_DEFAULT,
   RETRIEVAL_TOP_K_MAX,
   RETRIEVAL_TOP_K_MIN,
+  type SystemRuntime,
   SystemConfigService,
 } from "@/services/SystemConfigService";
 
@@ -66,6 +67,32 @@ function formatThreshold(n: number): string {
   return String(round2(n));
 }
 
+/** Monospace stack for rendering model identities and env keys verbatim. */
+const MONO: CSSProperties = {
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+};
+
+/** One read-only env-sourced fact (label + value) in the runtime card. */
+function RuntimeFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <span
+        style={{
+          color: "var(--muted-2)",
+          fontSize: 11,
+          textTransform: "uppercase",
+          letterSpacing: "0.04em",
+        }}
+      >
+        {label}
+      </span>
+      <span style={{ ...MONO, fontSize: 13, fontWeight: 600, color: "var(--ink-2)" }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
 export function AdminSystemConfigPage() {
   const [topK, setTopK] = useState<number>(RETRIEVAL_TOP_K_DEFAULT);
   const [maxFiles, setMaxFiles] = useState<number>(RETRIEVAL_MAX_FILES_DEFAULT);
@@ -75,11 +102,12 @@ export function AdminSystemConfigPage() {
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [runtime, setRuntime] = useState<SystemRuntime | null>(null);
 
   useEffect(() => {
     void (async () => {
       try {
-        const { config, updatedAt } = await SystemConfigService.get();
+        const { config, updatedAt, runtime } = await SystemConfigService.get();
         setTopK(
           typeof config.retrieval_top_k === "number"
             ? config.retrieval_top_k
@@ -98,6 +126,7 @@ export function AdminSystemConfigPage() {
           ),
         );
         setUpdatedAt(updatedAt);
+        setRuntime(runtime);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Could not load system config";
         toast.error(msg);
@@ -168,6 +197,68 @@ export function AdminSystemConfigPage() {
       </div>
 
       <div style={{ maxWidth: 640 }}>
+        {runtime && (
+          <div
+            style={{
+              border: "1px solid var(--rule)",
+              background: "var(--paper-2)",
+              borderRadius: "var(--r-md)",
+              padding: 16,
+              marginBottom: 24,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "space-between",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <div className="field-label" style={{ marginBottom: 0 }}>
+                Active model
+              </div>
+              <span
+                style={{
+                  color: "var(--muted-2)",
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                Read-only · from backend env
+              </span>
+            </div>
+            <div style={{ ...MONO, fontSize: 15, fontWeight: 600, color: "var(--teal)", marginTop: 8 }}>
+              {runtime.qwen_vl_model}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px 28px",
+                marginTop: 14,
+                paddingTop: 14,
+                borderTop: "1px solid var(--rule-2)",
+              }}
+            >
+              <RuntimeFact label="Embedding" value={runtime.qwen_embedding_model} />
+              <RuntimeFact label="Temperature" value={String(runtime.qwen_temperature)} />
+              <RuntimeFact label="Top-p" value={String(runtime.qwen_top_p)} />
+            </div>
+            <div style={{ color: "var(--muted)", fontSize: 12, marginTop: 12, lineHeight: 1.5 }}>
+              The Qwen vision-language model answers every chat turn and reads
+              page images at ingest; temperature and top-p control generation
+              sampling. These come from the backend environment — to change them,
+              edit the backend <code style={MONO}>.env</code> (
+              <code style={MONO}>QWEN_VL_MODEL</code>,{" "}
+              <code style={MONO}>QWEN_TEMPERATURE</code>,{" "}
+              <code style={MONO}>QWEN_TOP_P</code>) and restart.
+            </div>
+          </div>
+        )}
+
         <p style={{ color: "var(--ink-2)", fontSize: 13, lineHeight: 1.5, marginBottom: 20 }}>
           The retrieval pipeline ranks knowledge-base chunks for each chat
           question. These caps and the relevance threshold control how much

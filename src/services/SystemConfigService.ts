@@ -6,12 +6,36 @@ export interface SystemConfigBlob {
   relevance_threshold?: number;
 }
 
+/**
+ * Read-only model identities the backend reports from its `.env`. Surfaced for
+ * display only — not editable from the admin UI (change the backend's
+ * `QWEN_VL_MODEL` and restart).
+ */
+export interface SystemRuntime {
+  qwen_vl_model: string;
+  qwen_embedding_model: string;
+  qwen_temperature: number;
+  qwen_top_p: number;
+}
+
 export const SystemConfigService = {
-  async get(): Promise<{ config: SystemConfigBlob; updatedAt: string | null }> {
+  async get(): Promise<{
+    config: SystemConfigBlob;
+    updatedAt: string | null;
+    runtime: SystemRuntime | null;
+  }> {
     const { data } = await api.get<{
-      data: { config: SystemConfigBlob; updated_at: string | null };
+      data: {
+        config: SystemConfigBlob;
+        updated_at: string | null;
+        runtime: SystemRuntime | null;
+      };
     }>("/api/system-config");
-    return { config: data.data.config ?? {}, updatedAt: data.data.updated_at };
+    return {
+      config: data.data.config ?? {},
+      updatedAt: data.data.updated_at,
+      runtime: data.data.runtime ?? null,
+    };
   },
 
   async save(config: SystemConfigBlob): Promise<void> {
