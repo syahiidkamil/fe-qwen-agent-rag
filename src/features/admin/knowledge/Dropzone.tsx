@@ -67,7 +67,7 @@ export function Dropzone() {
         <div className="dropzone-title">Drop documents here</div>
         <div className="dropzone-sub">
           or click anywhere in this area to browse · PDF · DOCX · MD · TXT · CSV ·
-          HTML · max 50 MB per file
+          HTML · PNG · JPG · max 50 MB per file
         </div>
       </div>
 

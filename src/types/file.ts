@@ -8,6 +8,7 @@ export type KbFileType =
   | "csv"
   | "json"
   | "html"
+  | "image"
   | "file";
 
 export interface KbFile {

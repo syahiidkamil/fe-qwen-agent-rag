@@ -22,7 +22,9 @@ function inferType(filename: string, mime: string | null): KbFileType {
   if (ext === "json") return "json";
   if (ext === "html" || ext === "htm") return "html";
   if (ext === "txt") return "txt";
+  if (["png", "jpg", "jpeg", "webp", "gif", "bmp"].includes(ext)) return "image";
   if (mime?.includes("pdf")) return "pdf";
+  if (mime?.startsWith("image/")) return "image";
   return "file";
 }
 
