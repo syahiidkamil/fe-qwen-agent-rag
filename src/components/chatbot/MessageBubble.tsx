@@ -35,13 +35,13 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             const label = (
               <>
                 <span className="ix">[{i + 1}]</span> {truncate(s.name)}
-                {showDebug && typeof s.score === "number" && (
+                {showDebug && typeof s.similarity === "number" && (
                   <span
                     className="msg-time"
                     style={{ marginLeft: 4 }}
-                    title="Reciprocal Rank Fusion score"
+                    title="Cosine similarity to your question (0–1)"
                   >
-                    {s.score.toFixed(4)}
+                    {s.similarity.toFixed(2)}
                   </span>
                 )}
               </>

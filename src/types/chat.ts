@@ -2,9 +2,9 @@ export interface ChatSource {
   id: string;
   name: string;
   url?: string;
-  /** Raw Reciprocal Rank Fusion score for this source (small, ~0.0–0.04).
-   *  Surfaced only in admin Debug Mode to calibrate the relevance threshold. */
-  score?: number;
+  /** Cosine similarity (0–1) of the top chunk to the question. Surfaced only in
+   *  admin Debug Mode to calibrate the relevance threshold. */
+  similarity?: number;
 }
 
 export interface ChatMessage {

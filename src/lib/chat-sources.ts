@@ -9,9 +9,9 @@ import type { ChatSource } from "@/types/chat";
  * live chat store and the session loader so replayed history renders source
  * chips identically to freshly-streamed answers.
  *
- * Refs arrive sorted by score desc, so the first occurrence per document is
- * its highest-scoring chunk — that score is carried onto the chip and shown
- * in admin Debug Mode to calibrate the relevance threshold.
+ * Refs arrive ranked (RRF) best-first, so the first occurrence per document is
+ * its top chunk — that chunk's cosine similarity is carried onto the chip and
+ * shown in admin Debug Mode to calibrate the relevance threshold.
  */
 export function sourcesToChat(refs: SourceRef[]): ChatSource[] {
   const seen = new Set<string>();
@@ -23,7 +23,7 @@ export function sourcesToChat(refs: SourceRef[]): ChatSource[] {
       id: r.document_id,
       name: r.filename || `doc-${r.document_id.slice(0, 6)}`,
       url: r.url ?? undefined,
-      score: r.score,
+      similarity: r.similarity ?? undefined,
     });
   }
   return out;

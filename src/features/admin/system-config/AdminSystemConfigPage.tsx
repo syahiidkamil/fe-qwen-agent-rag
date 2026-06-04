@@ -249,9 +249,9 @@ export function AdminSystemConfigPage() {
             </span>
           </div>
           <div style={{ color: "var(--muted)", fontSize: 12, marginTop: 6, lineHeight: 1.5 }}>
-            Filters out retrieved files scoring below this. Scores use Reciprocal
-            Rank Fusion and are small (typically under ~0.04). 0 = disabled. Turn
-            on Debug Mode in chat to read each file's actual score and calibrate.
+            Filters out files whose semantic similarity to your question is below
+            this. Similarity runs 0–1 (higher = stricter); 0 disables filtering.
+            Turn on Debug Mode in chat to read each file's similarity and calibrate.
           </div>
           {relevanceThresholdOutOfRange && (
             <div className="field-error">

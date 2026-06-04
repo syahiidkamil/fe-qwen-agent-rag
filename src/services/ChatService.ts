@@ -11,7 +11,12 @@ export interface SourceRef {
   document_id: string;
   filename?: string | null;
   url?: string | null;
+  /** Reciprocal Rank Fusion score — the backend uses it for ranking. */
   score: number;
+  /** Cosine similarity (0–1) of this chunk to the query. The relevance-threshold
+   *  gate runs on this, and it's the value shown in admin Debug Mode. null when
+   *  the chunk has no embedding; absent on history saved before this existed. */
+  similarity?: number | null;
 }
 
 export interface StreamCallbacks {
