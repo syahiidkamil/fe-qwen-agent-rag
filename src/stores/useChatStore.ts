@@ -230,3 +230,24 @@ useConfigStore.subscribe((s, prev) => {
     useChatStore.setState({ messages: [welcomeMessage()] });
   }
 });
+
+// Wipe all chat state whenever the signed-in user changes — logout
+// (userId → null), login, or switching accounts. The store lives in memory and
+// logout/login is a client-side navigation (no full page reload), so without
+// this the previous account's conversation, active sessionId, and saved session
+// list would bleed into the next sign-in. Keyed on userId (stable across email
+// changes), not email, so a self email-change refresh() doesn't nuke the chat.
+useAuthStore.subscribe((s, prev) => {
+  if (s.userId === prev.userId) return;
+  useChatStore.setState({
+    sessionId: null,
+    messages: [welcomeMessage()],
+    draft: "",
+    typing: false,
+    streaming: "",
+    pendingSources: [],
+    gated: false,
+    sessions: [],
+    sessionsLoading: false,
+  });
+});
