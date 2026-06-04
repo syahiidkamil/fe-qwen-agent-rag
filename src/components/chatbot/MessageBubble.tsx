@@ -1,4 +1,7 @@
 import { MarkdownText } from "@/components/chatbot/MarkdownText";
+import { formatMessageTime } from "@/lib/format";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useDebugStore } from "@/stores/useDebugStore";
 import type { ChatMessage } from "@/types/chat";
 
 interface MessageBubbleProps {
@@ -10,6 +13,13 @@ function truncate(s: string, max = 28): string {
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
+  const role = useAuthStore((s) => s.role);
+  const debugMode = useDebugStore((s) => s.debugMode);
+  // Belt-and-suspenders: only admins see debug info, even if a non-admin has a
+  // stale "debugMode: true" left in localStorage from a previous admin session.
+  const isAdmin = role === "admin" || role === "super_admin";
+  const showDebug = isAdmin && debugMode;
+
   return (
     <div className={`msg ${message.role}`}>
       <div className="bubble">
@@ -21,8 +31,22 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       </div>
       {message.sources && message.sources.length > 0 && (
         <div className="msg-cite">
-          {message.sources.map((s, i) =>
-            s.url ? (
+          {message.sources.map((s, i) => {
+            const label = (
+              <>
+                <span className="ix">[{i + 1}]</span> {truncate(s.name)}
+                {showDebug && typeof s.score === "number" && (
+                  <span
+                    className="msg-time"
+                    style={{ marginLeft: 4 }}
+                    title="Reciprocal Rank Fusion score"
+                  >
+                    {s.score.toFixed(4)}
+                  </span>
+                )}
+              </>
+            );
+            return s.url ? (
               <a
                 key={s.id}
                 className="cite"
@@ -31,16 +55,17 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 rel="noopener noreferrer"
                 title={s.name}
               >
-                <span className="ix">[{i + 1}]</span> {truncate(s.name)}
+                {label}
               </a>
             ) : (
               <span className="cite" key={s.id}>
-                <span className="ix">[{i + 1}]</span> {truncate(s.name)}
+                {label}
               </span>
-            ),
-          )}
+            );
+          })}
         </div>
       )}
+      <div className="msg-time">{formatMessageTime(message.createdAt, showDebug)}</div>
     </div>
   );
 }

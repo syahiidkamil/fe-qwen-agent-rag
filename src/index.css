@@ -1889,6 +1889,14 @@ a.cite { text-decoration: none; cursor: pointer; }
 a.cite:hover { background: var(--paper-2, var(--paper)); border-color: var(--teal-deep); color: var(--ink); }
 a.cite:hover .ix { color: var(--teal-deep); }
 
+/* Muted per-bubble timestamp + (in admin Debug Mode) raw RRF score chips. */
+.msg-time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.75;
+}
+
 .chat-suggestions {
   display: flex; flex-direction: column; gap: 6px;
   padding: 6px 18px 12px;

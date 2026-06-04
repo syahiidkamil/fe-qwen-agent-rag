@@ -18,6 +18,21 @@ export function relativeTimeFromNow(epochMs: number): string {
   return `${Math.round(days / 30)} mo ago`;
 }
 
+/**
+ * Format a chat message timestamp for display on the bubble.
+ *
+ * Default: a human-readable wall-clock time with seconds (e.g. "3:07:42 PM").
+ * With `withMillis` (admin Debug Mode): appends milliseconds (e.g.
+ * "3:07:42.318 PM") so admins can see exact ordering of rapid messages.
+ */
+export function formatMessageTime(epochMs: number, withMillis = false): string {
+  const d = new Date(epochMs);
+  const base = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+  if (!withMillis) return base;
+  const ms = String(d.getMilliseconds()).padStart(3, "0");
+  return base.replace(/(\d{1,2}:\d{2}:\d{2})/, `$1.${ms}`);
+}
+
 export function inferFileType(name: string): import("@/types/file").KbFileType {
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "pdf") return "pdf";

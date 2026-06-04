@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { Lock, RotateCcw, Send, X } from "lucide-react";
+import { Bug, Lock, RotateCcw, Send, X } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useDebugStore } from "@/stores/useDebugStore";
 import { MessageBubble } from "@/components/chatbot/MessageBubble";
 import { MarkdownText } from "@/components/chatbot/MarkdownText";
 import { TypingIndicator } from "@/components/chatbot/TypingIndicator";
@@ -20,6 +21,10 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
   const widget = useConfigStore((s) => s.config.widget);
   const chatMode = useConfigStore((s) => s.config.chat_mode);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const role = useAuthStore((s) => s.role);
+  const isAdmin = role === "admin" || role === "super_admin";
+  const debugMode = useDebugStore((s) => s.debugMode);
+  const toggleDebugMode = useDebugStore((s) => s.toggleDebugMode);
   const messages = useChatStore((s) => s.messages);
   const draft = useChatStore((s) => s.draft);
   const typing = useChatStore((s) => s.typing);
@@ -74,6 +79,30 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
           <div className="chat-name">{widget.name}</div>
           <div className="chat-status">ai agent helper</div>
         </div>
+        {isAdmin && (
+          <button
+            type="button"
+            className="chat-head-close"
+            onClick={toggleDebugMode}
+            aria-label="Toggle debug mode"
+            aria-pressed={debugMode}
+            title={debugMode ? "Debug mode on — click to disable" : "Debug mode off"}
+            style={{
+              marginRight: 6,
+              width: "auto",
+              padding: "0 8px",
+              gap: 4,
+              fontSize: 11,
+              fontWeight: 600,
+              // On-state must read clearly against the dark ink header — invert
+              // to a solid light chip (teal text on white) so "active" stands out.
+              ...(debugMode ? { background: "#fff", color: "var(--teal-deep)" } : undefined),
+            }}
+          >
+            <Bug size={13} strokeWidth={2.2} />
+            Debug
+          </button>
+        )}
         <button
           type="button"
           className="chat-head-close"

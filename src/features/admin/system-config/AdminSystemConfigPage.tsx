@@ -3,6 +3,10 @@ import { toast } from "sonner";
 import { Save } from "lucide-react";
 
 import {
+  RELEVANCE_THRESHOLD_DEFAULT,
+  RELEVANCE_THRESHOLD_MAX,
+  RELEVANCE_THRESHOLD_MIN,
+  RELEVANCE_THRESHOLD_STEP,
   RETRIEVAL_MAX_FILES_DEFAULT,
   RETRIEVAL_MAX_FILES_MAX,
   RETRIEVAL_MAX_FILES_MIN,
@@ -26,9 +30,22 @@ function clamp(value: number, lo: number, hi: number, fallback: number): number 
   return Math.max(lo, Math.min(hi, n));
 }
 
+/**
+ * Float clamp for the relevance threshold — unlike `clamp`, it must NOT round
+ * (RRF scores live around 0.0–0.04, so rounding to an integer would destroy
+ * every meaningful value). A non-finite input falls back to the default.
+ */
+function clampFloat(value: number, lo: number, hi: number, fallback: number): number {
+  const n = Number.isFinite(value) ? value : fallback;
+  return Math.max(lo, Math.min(hi, n));
+}
+
 export function AdminSystemConfigPage() {
   const [topK, setTopK] = useState<number>(RETRIEVAL_TOP_K_DEFAULT);
   const [maxFiles, setMaxFiles] = useState<number>(RETRIEVAL_MAX_FILES_DEFAULT);
+  const [relevanceThreshold, setRelevanceThreshold] = useState<number>(
+    RELEVANCE_THRESHOLD_DEFAULT,
+  );
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
@@ -46,6 +63,11 @@ export function AdminSystemConfigPage() {
           typeof config.retrieval_max_files === "number"
             ? config.retrieval_max_files
             : RETRIEVAL_MAX_FILES_DEFAULT,
+        );
+        setRelevanceThreshold(
+          typeof config.relevance_threshold === "number"
+            ? config.relevance_threshold
+            : RELEVANCE_THRESHOLD_DEFAULT,
         );
         setUpdatedAt(updatedAt);
       } catch (err) {
@@ -69,8 +91,15 @@ export function AdminSystemConfigPage() {
     RETRIEVAL_MAX_FILES_MAX,
     RETRIEVAL_MAX_FILES_DEFAULT,
   );
+  const clampedRelevanceThreshold = clampFloat(
+    relevanceThreshold,
+    RELEVANCE_THRESHOLD_MIN,
+    RELEVANCE_THRESHOLD_MAX,
+    RELEVANCE_THRESHOLD_DEFAULT,
+  );
   const topKOutOfRange = clampedTopK !== topK;
   const maxFilesOutOfRange = clampedMaxFiles !== maxFiles;
+  const relevanceThresholdOutOfRange = clampedRelevanceThreshold !== relevanceThreshold;
 
   const handleSave = async () => {
     setSaving(true);
@@ -78,9 +107,11 @@ export function AdminSystemConfigPage() {
       await SystemConfigService.save({
         retrieval_top_k: clampedTopK,
         retrieval_max_files: clampedMaxFiles,
+        relevance_threshold: clampedRelevanceThreshold,
       });
       setTopK(clampedTopK);
       setMaxFiles(clampedMaxFiles);
+      setRelevanceThreshold(clampedRelevanceThreshold);
       const fresh = await SystemConfigService.get();
       setUpdatedAt(fresh.updatedAt);
       toast.success("System config saved");
@@ -104,8 +135,9 @@ export function AdminSystemConfigPage() {
       <div style={{ maxWidth: 640 }}>
         <p style={{ color: "var(--ink-2)", fontSize: 13, lineHeight: 1.5, marginBottom: 20 }}>
           The retrieval pipeline ranks knowledge-base chunks for each chat
-          question. These two caps control how much makes it into the LLM
-          context and how focused the citation list stays.
+          question. These caps and the relevance threshold control how much
+          makes it into the LLM context, how focused the citation list stays,
+          and how aggressively low-scoring chunks are filtered out.
         </p>
 
         <label className="field">
@@ -156,6 +188,37 @@ export function AdminSystemConfigPage() {
           {maxFilesOutOfRange && (
             <div className="field-error">
               Out of range — will be saved as {clampedMaxFiles}.
+            </div>
+          )}
+        </label>
+
+        <label className="field">
+          <div className="field-label">Relevance threshold</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <input
+              type="number"
+              min={RELEVANCE_THRESHOLD_MIN}
+              max={RELEVANCE_THRESHOLD_MAX}
+              step={RELEVANCE_THRESHOLD_STEP}
+              value={loaded ? relevanceThreshold : ""}
+              disabled={!loaded || saving}
+              onChange={(e) => setRelevanceThreshold(Number(e.target.value))}
+              className="input"
+              style={{ width: 120 }}
+            />
+            <span style={{ color: "var(--muted)", fontSize: 12 }}>
+              {RELEVANCE_THRESHOLD_MIN}–{RELEVANCE_THRESHOLD_MAX} · default{" "}
+              {RELEVANCE_THRESHOLD_DEFAULT} · 0 disables filtering
+            </span>
+          </div>
+          <div style={{ color: "var(--muted)", fontSize: 12, marginTop: 6, lineHeight: 1.5 }}>
+            Filters out retrieved files scoring below this. Scores use Reciprocal
+            Rank Fusion and are small (typically under ~0.04). 0 = disabled. Turn
+            on Debug Mode in chat to read each file's actual score and calibrate.
+          </div>
+          {relevanceThresholdOutOfRange && (
+            <div className="field-error">
+              Out of range — will be saved as {clampedRelevanceThreshold}.
             </div>
           )}
         </label>

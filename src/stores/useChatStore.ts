@@ -38,7 +38,7 @@ interface ChatState {
 
 function welcomeMessage(): ChatMessage {
   const welcome = useConfigStore.getState().config.widget.welcome;
-  return { id: "m0", role: "bot", text: welcome };
+  return { id: "m0", role: "bot", text: welcome, createdAt: Date.now() };
 }
 
 /**
@@ -67,6 +67,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       id: `u${Date.now()}`,
       role: "user",
       text: content,
+      createdAt: Date.now(),
     };
     set({
       messages: [...get().messages, userMsg],
@@ -117,6 +118,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             role: "bot",
             text: fallback,
             sources: sourcesToChat(get().pendingSources),
+            createdAt: Date.now(),
           };
           set({
             messages: [...get().messages, botMsg],
@@ -134,6 +136,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             id: `b${Date.now()}`,
             role: "bot",
             text: `Sorry — I couldn't reach the assistant (${err.message}).`,
+            createdAt: Date.now(),
           };
           set({
             messages: [...get().messages, botMsg],
@@ -148,7 +151,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set({
         messages: [
           ...get().messages,
-          { id: `b${Date.now()}`, role: "bot", text: `Network error: ${msg}` },
+          {
+            id: `b${Date.now()}`,
+            role: "bot",
+            text: `Network error: ${msg}`,
+            createdAt: Date.now(),
+          },
         ],
         typing: false,
         streaming: "",

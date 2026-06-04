@@ -2,6 +2,9 @@ export interface ChatSource {
   id: string;
   name: string;
   url?: string;
+  /** Raw Reciprocal Rank Fusion score for this source (small, ~0.0–0.04).
+   *  Surfaced only in admin Debug Mode to calibrate the relevance threshold. */
+  score?: number;
 }
 
 export interface ChatMessage {
@@ -9,6 +12,9 @@ export interface ChatMessage {
   role: "user" | "bot";
   text: string;
   sources?: ChatSource[];
+  /** Epoch ms when the message was created. Required so the compiler flags
+   *  every construction site; render with formatMessageTime(). */
+  createdAt: number;
 }
 
 /** A persisted, per-user chat session as shown in the AI Help sidebar. */

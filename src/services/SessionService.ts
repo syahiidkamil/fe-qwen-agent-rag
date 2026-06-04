@@ -33,11 +33,15 @@ function toSession(s: BackendSession): ChatSession {
 }
 
 function toMessage(m: BackendMessage): ChatMessage {
+  // created_at is an ISO string from the backend; fall back to now if a legacy
+  // row is missing it so we never emit NaN (which would break time formatting).
+  const createdAt = m.created_at ? new Date(m.created_at).getTime() : Date.now();
   return {
     id: m.id,
     role: m.role === "user" ? "user" : "bot",
     text: m.content,
     sources: m.sources && m.sources.length ? sourcesToChat(m.sources) : undefined,
+    createdAt: Number.isNaN(createdAt) ? Date.now() : createdAt,
   };
 }
 
