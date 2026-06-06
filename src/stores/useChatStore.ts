@@ -16,6 +16,8 @@ interface ChatState {
   streaming: string;
   /** Sources for the in-flight assistant message. */
   pendingSources: SourceRef[];
+  /** Evidence page image URLs for the in-flight assistant message. */
+  pendingImages: string[];
   /** True once the BE has refused a send with INTERNAL_MODE_REQUIRES_AUTH.
    *  The widget shows the "Sign in to chat" gate over the existing
    *  conversation (greyed) until the user signs in or resets. */
@@ -53,6 +55,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   typing: false,
   streaming: "",
   pendingSources: [],
+  pendingImages: [],
   gated: false,
   sessions: [],
   sessionsLoading: false,
@@ -75,6 +78,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       typing: true,
       streaming: "",
       pendingSources: [],
+      pendingImages: [],
     });
 
     // Map UI message history to backend wire format. The widget's bot welcome
@@ -92,7 +96,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       await streamChat(wire, get().sessionId, {
         onSession: (id) => set({ sessionId: id }),
-        onSources: (refs) => set({ pendingSources: refs }),
+        onSources: (refs, images) => set({ pendingSources: refs, pendingImages: images }),
         onToken: (delta) => set((s) => ({ streaming: s.streaming + delta })),
         onServerError: (msg) => {
           serverError = msg;
@@ -113,11 +117,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
         },
         onDone: (full) => {
           const fallback = serverError ? `⚠ ${serverError}` : full || get().streaming;
+          const pendingImages = get().pendingImages;
           const botMsg: ChatMessage = {
             id: `b${Date.now()}`,
             role: "bot",
             text: fallback,
             sources: sourcesToChat(get().pendingSources),
+            images: pendingImages.length ? pendingImages : undefined,
             createdAt: Date.now(),
           };
           set({
@@ -125,6 +131,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             typing: false,
             streaming: "",
             pendingSources: [],
+            pendingImages: [],
           });
           // Refresh the sidebar so a freshly-created session shows up with
           // its auto-title and the list re-sorts by recent activity.
@@ -172,6 +179,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       typing: false,
       streaming: "",
       pendingSources: [],
+      pendingImages: [],
       gated: false,
     }),
 
@@ -246,6 +254,7 @@ useAuthStore.subscribe((s, prev) => {
     typing: false,
     streaming: "",
     pendingSources: [],
+    pendingImages: [],
     gated: false,
     sessions: [],
     sessionsLoading: false,

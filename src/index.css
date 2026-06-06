@@ -1870,6 +1870,14 @@ button.file-cell-link:focus-visible {
 /* User bubble keeps plain text — but if we ever render markdown there, recolor links. */
 .msg.user .markdown a { color: #fff; }
 .msg.user .markdown code, .msg.user .markdown pre { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.18); color: #fff; }
+.markdown .mermaid-diagram { display: flex; justify-content: center; margin: 6px 0; }
+.markdown .mermaid-diagram svg { max-width: 100%; height: auto; }
+
+/* Evidence page image(s) the answer drew on — shown under the bubble. */
+.msg-images { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.msg-images a { display: block; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; line-height: 0; transition: border-color 0.15s; }
+.msg-images a:hover { border-color: var(--teal-deep); }
+.msg-images img { display: block; max-height: 150px; width: auto; object-fit: cover; }
 
 .msg-cite { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .cite {

@@ -21,7 +21,9 @@ export interface SourceRef {
 
 export interface StreamCallbacks {
   onSession?: (sessionId: string) => void;
-  onSources?: (sources: SourceRef[]) => void;
+  /** `images` are the evidence page image URLs the answer drew on (deduped per
+   *  page, capped). Empty when vision is off or the docs have no page images. */
+  onSources?: (sources: SourceRef[], images: string[]) => void;
   onToken: (delta: string) => void;
   /** Server-side error event (e.g. LLM API failure) inside the SSE stream. */
   onServerError?: (message: string) => void;
@@ -103,7 +105,7 @@ export async function streamChat(
       try {
         const ev = JSON.parse(payload);
         if (ev.type === "session" && ev.session_id) cb.onSession?.(ev.session_id);
-        else if (ev.type === "sources") cb.onSources?.(ev.sources ?? []);
+        else if (ev.type === "sources") cb.onSources?.(ev.sources ?? [], ev.images ?? []);
         else if (ev.type === "token" && ev.delta) {
           full += ev.delta;
           cb.onToken(ev.delta);

@@ -14,6 +14,10 @@ export interface ChatMessage {
   role: "user" | "bot";
   text: string;
   sources?: ChatSource[];
+  /** Source page image URLs the answer drew on (evidence pages), deduped per
+   *  page and capped by the backend. Live answers only — not persisted to
+   *  session history. */
+  images?: string[];
   /** Epoch ms when the message was created. Required so the compiler flags
    *  every construction site; render with formatMessageTime(). */
   createdAt: number;

@@ -29,6 +29,21 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           message.text
         )}
       </div>
+      {message.images && message.images.length > 0 && (
+        <div className="msg-images">
+          {message.images.map((src, i) => (
+            <a
+              key={src}
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open source page"
+            >
+              <img src={src} alt={`Source page ${i + 1}`} loading="lazy" />
+            </a>
+          ))}
+        </div>
+      )}
       {message.sources && message.sources.length > 0 && (
         <div className="msg-cite">
           {message.sources.map((s, i) => {
