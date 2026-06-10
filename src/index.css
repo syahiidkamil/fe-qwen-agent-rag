@@ -305,6 +305,8 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: saturate(160%) blur(12px);
   -webkit-backdrop-filter: saturate(160%) blur(12px);
   border-bottom: 1px solid var(--rule-2);
+  /* Keep the bar's content below the iOS status bar (viewport-fit=cover). */
+  padding-top: env(safe-area-inset-top);
 }
 .land-nav-inner {
   max-width: var(--maxw);
@@ -1169,6 +1171,9 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--rule);
   padding: 0 var(--pad);
+  /* viewport-fit=cover lets the page run under the iOS status bar; pad the
+     sticky bar so its content (hamburger) is never clipped by the notch. */
+  padding-top: env(safe-area-inset-top);
   min-height: 56px;
   display: flex; align-items: center; gap: 16px;
 }
@@ -2145,7 +2150,11 @@ a.cite:hover .ix { color: var(--teal-deep); }
     border-radius: 0;
     border: none;
   }
-  /* Keep the input clear of the iOS home indicator. */
+  /* Keep the sheet's header below the status bar and the input clear of
+     the iOS home indicator. */
+  .chat-panel:not([data-fullpage="true"]) .chat-head {
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
   .chat-panel:not([data-fullpage="true"]) .chat-input {
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
@@ -2159,7 +2168,11 @@ a.cite:hover .ix { color: var(--teal-deep); }
      auto 1fr keeps the bar content-sized instead of stretching to half
      the viewport (stacked grid rows otherwise share the 100dvh evenly). */
   .login-wrap { grid-template-rows: auto 1fr; }
-  .login-side { min-height: 0; padding: 16px 24px; }
+  .login-side {
+    min-height: 0;
+    padding: 16px 24px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
   .login-side-blobs,
   .login-side-lines { display: none; }
   .login-side-tagline { font-size: 12px; }
@@ -2487,6 +2500,7 @@ a.cite:hover .ix { color: var(--teal-deep); }
     z-index: 1001;
     transform: translateX(-100%);
     transition: transform 200ms ease;
+    padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .admin-app[data-nav-open="true"] .admin-side {
@@ -2507,6 +2521,7 @@ a.cite:hover .ix { color: var(--teal-deep); }
      rule even when the user collapsed the sidebar on desktop. */
   .is-collapsed .admin-side {
     padding: 0 16px;
+    padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     align-items: stretch;
   }
@@ -2602,10 +2617,11 @@ a.cite:hover .ix { color: var(--teal-deep); }
 .ai-help-shell {
   /* Escape .admin-content's padding (32px top, var(--pad) horizontal, 100px
      bottom) so the chat surface fills the column. The topbar is 57px tall
-     (56px min-height + 1px border); the chat absorbs the rest. */
+     (56px min-height + 1px border) plus the status-bar safe-area inset;
+     the chat absorbs the rest. */
   margin: -32px calc(-1 * var(--pad)) -100px;
   height: calc(100vh - 57px);
-  height: calc(100dvh - 57px);
+  height: calc(100dvh - 57px - env(safe-area-inset-top));
   display: flex;
   flex-direction: row;
   min-height: 0;
@@ -2765,6 +2781,7 @@ a.cite:hover .ix { color: var(--teal-deep); }
     transform: translateX(-100%);
     transition: transform 200ms ease;
     border-right: 1px solid var(--rule);
+    padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
   .chat-sessions[data-open="true"] {
@@ -3142,6 +3159,11 @@ a.cite:hover .ix { color: var(--teal-deep); }
   /* Typography / padding step-downs */
   .page-title { font-size: clamp(26px, 6vw, 44px); }
   .admin-content { padding: 20px var(--pad) 48px; }
+  /* The AI Help shell escapes .admin-content's padding via negative
+     margins — keep them in sync with the smaller mobile padding above,
+     or the chat head slides under the topbar and a dead strip opens at
+     the bottom. */
+  .ai-help-shell { margin: -20px calc(-1 * var(--pad)) -48px; }
   .kb-empty { padding: 48px 20px; font-size: 18px; }
   .dropzone-title { font-size: 21px; }
   .kb-meta-card .v { font-size: 30px; }
