@@ -59,9 +59,10 @@ export const DocumentService = {
     return data.data.map(toKbFile);
   },
 
-  async upload(file: File): Promise<KbFile> {
+  async upload(file: File, ingest = true): Promise<KbFile> {
     const fd = new FormData();
     fd.append("file", file);
+    fd.append("ingest", String(ingest));
     const { data } = await api.post<{ data: BackendDoc }>("/api/documents", fd, {
       headers: { "Content-Type": "multipart/form-data" },
     });

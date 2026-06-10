@@ -282,6 +282,13 @@ a { color: inherit; text-decoration: none; }
 }
 .pill.uploaded  { color: #7A6420; background: #FFF6E0; border-color: #F4E0A8; }
 .pill.ingesting { color: var(--teal-deep); background: var(--teal-tint); border-color: #B5E1D9; }
+/* Activity is signaled by the pulsing dot, not an inline progress bar —
+   keeps the pill the same compact width as the other statuses. */
+.pill.ingesting .pill-dot { animation: pill-dot-pulse 1.2s ease-in-out infinite; }
+@keyframes pill-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
 .pill.ingested  { color: #1E7D52; background: #DCF5E7; border-color: #B8E4CA; }
 .pill.failed    { color: #B33C2D; background: #FDE6E2; border-color: #F4C0B7; }
 
@@ -1606,18 +1613,13 @@ button.file-cell-link:focus-visible {
   letter-spacing: 0.02em;
 }
 
-.progress-bar {
-  width: 100px; height: 4px;
-  background: var(--rule-2);
-  border-radius: 999px; overflow: hidden;
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 6px;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--teal);
-  transition: width .25s ease;
+/* Failed rows hide the raw backend error behind this icon — full text
+   lives in the title tooltip so the table stays scannable. */
+.row-error-hint {
+  display: inline-flex;
+  align-items: center;
+  color: var(--red);
+  cursor: help;
 }
 
 .row-actions {

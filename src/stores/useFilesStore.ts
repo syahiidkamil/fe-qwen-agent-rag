@@ -73,9 +73,10 @@ export const useFilesStore = create<FilesState>((set, get) => ({
   },
 
   async addFiles(rawFiles) {
+    const ingest = get().ingestImmediately;
     for (const rf of rawFiles) {
       try {
-        const created = await DocumentService.upload(rf);
+        const created = await DocumentService.upload(rf, ingest);
         set((s) => ({ files: [created, ...s.files] }));
       } catch (err) {
         toast.error(`Upload failed for ${rf.name}: ${describeError(err)}`);

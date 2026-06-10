@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { AlertCircle, Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import type { KbFile } from "@/types/file";
 import { useFilesStore } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
@@ -105,15 +105,10 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             <FileIcon type={f.type} />
             <div>
               <div className="file-name">{f.name}</div>
-              {f.error && (
-                <div className="file-sub" style={{ color: "var(--red)" }}>
-                  {f.error}
-                </div>
-              )}
-              {!f.error && f.status === "ingested" && (
+              {f.status === "ingested" && (
                 <div className="file-sub">{f.chunks} chunks indexed</div>
               )}
-              {!f.error && f.status === "uploaded" && (
+              {f.status === "uploaded" && (
                 <div className="file-sub">awaiting ingest</div>
               )}
             </div>
@@ -123,12 +118,12 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             <FileIcon type={f.type} />
             <div>
               <div className="file-name">{f.name}</div>
-              {f.error && (
+              {f.status === "failed" && (
                 <div className="file-sub" style={{ color: "var(--red)" }}>
-                  {f.error}
+                  ingestion failed
                 </div>
               )}
-              {!f.error && f.status === "ingesting" && (
+              {f.status === "ingesting" && (
                 <div className="file-sub">embedding · vectorizing · indexing</div>
               )}
             </div>
@@ -139,11 +134,6 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
         <span className={`pill ${f.status}`}>
           <span className="pill-dot" />
           {f.status}
-          {f.status === "ingesting" && (
-            <span className="progress-bar">
-              <span className="progress-fill" style={{ width: `${f.progress}%` }} />
-            </span>
-          )}
         </span>
       </td>
       <td>
@@ -189,10 +179,22 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             </button>
           )}
           {f.status === "failed" && (
-            <button type="button" className="row-act" onClick={onRetry}>
-              <RotateCcw size={11} strokeWidth={1.5} />
-              Retry
-            </button>
+            <>
+              {f.error && (
+                <span
+                  className="row-error-hint"
+                  title={f.error}
+                  role="img"
+                  aria-label={`Error details: ${f.error}`}
+                >
+                  <AlertCircle size={14} strokeWidth={1.8} />
+                </span>
+              )}
+              <button type="button" className="row-act" onClick={onRetry}>
+                <RotateCcw size={11} strokeWidth={1.5} />
+                Retry
+              </button>
+            </>
           )}
           {f.status === "ingested" && (
             <button
