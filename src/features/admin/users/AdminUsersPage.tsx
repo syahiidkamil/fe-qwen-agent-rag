@@ -35,7 +35,7 @@ export function AdminUsersPage() {
         <div className="page-actions">
           <button
             type="button"
-            className="btn btn-teal btn-sm"
+            className="btn btn-teal btn-sm btn-mobile-fab"
             onClick={() => setShowAdd(true)}
           >
             <UserPlus size={12} strokeWidth={1.8} />
