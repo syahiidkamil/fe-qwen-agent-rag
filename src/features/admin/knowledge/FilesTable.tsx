@@ -180,20 +180,21 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
           )}
           {f.status === "failed" && (
             <>
-              {f.error && (
-                <span
-                  className="row-error-hint"
-                  title={f.error}
-                  role="img"
-                  aria-label={`Error details: ${f.error}`}
-                >
-                  <AlertCircle size={14} strokeWidth={1.8} />
-                </span>
-              )}
               <button type="button" className="row-act" onClick={onRetry}>
                 <RotateCcw size={11} strokeWidth={1.5} />
                 Retry
               </button>
+              {f.error && (
+                <button
+                  type="button"
+                  className="row-error-hint"
+                  data-tip={f.error}
+                  aria-label={`Error details: ${f.error}`}
+                  onClick={() => toast.error(f.error ?? "Unknown error")}
+                >
+                  <AlertCircle size={14} strokeWidth={1.8} />
+                </button>
+              )}
             </>
           )}
           {f.status === "ingested" && (

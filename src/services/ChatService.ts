@@ -31,7 +31,10 @@ export interface StreamCallbacks {
    *  is "internal" and the visitor is anonymous. The widget should swap
    *  to the "Sign in to chat" gate. */
   onAuthRequired?: () => void;
-  onDone: (full: string) => void;
+  /** `refused` is true when the model declined to answer from the knowledge
+   *  base — the UI should drop the source chips/images it received up front,
+   *  since a refusal cites nothing. */
+  onDone: (full: string, refused?: boolean) => void;
   onError: (err: Error) => void;
 }
 
@@ -85,6 +88,7 @@ export async function streamChat(
   const decoder = new TextDecoder();
   let buffer = "";
   let full = "";
+  let refused = false;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -99,7 +103,7 @@ export async function streamChat(
       if (!line.startsWith("data:")) continue;
       const payload = line.slice(5).trim();
       if (payload === "[DONE]") {
-        cb.onDone(full);
+        cb.onDone(full, refused);
         return;
       }
       try {
@@ -113,6 +117,7 @@ export async function streamChat(
           cb.onServerError?.(ev.message ?? ev.code ?? "Unknown server error");
         } else if (ev.type === "done") {
           full = ev.full_text ?? full;
+          refused = Boolean(ev.refused);
         }
       } catch (err) {
         cb.onError(err instanceof Error ? err : new Error(String(err)));
@@ -120,5 +125,5 @@ export async function streamChat(
     }
   }
   // Stream ended without explicit [DONE]
-  cb.onDone(full);
+  cb.onDone(full, refused);
 }

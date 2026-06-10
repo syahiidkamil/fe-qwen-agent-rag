@@ -1613,13 +1613,48 @@ button.file-cell-link:focus-visible {
   letter-spacing: 0.02em;
 }
 
-/* Failed rows hide the raw backend error behind this icon — full text
-   lives in the title tooltip so the table stays scannable. */
+/* Failed rows hide the raw backend error behind this icon. The full text
+   shows instantly on hover/focus via a CSS tooltip (native title has a
+   ~1.5s delay that reads as broken), and a click toasts it for touch.
+   The tooltip opens to the LEFT of the icon: the actions column hugs the
+   table's right edge and .table-wrap clips overflow, so leftward is the
+   side with guaranteed room. */
 .row-error-hint {
+  position: relative;
   display: inline-flex;
   align-items: center;
+  border: 0;
+  background: none;
+  padding: 0;
   color: var(--red);
   cursor: help;
+}
+.row-error-hint::after {
+  content: attr(data-tip);
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: max-content;
+  max-width: 340px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+.row-error-hint:hover::after,
+.row-error-hint:focus-visible::after {
+  opacity: 1;
 }
 
 .row-actions {

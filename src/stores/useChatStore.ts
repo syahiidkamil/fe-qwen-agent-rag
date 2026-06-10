@@ -115,14 +115,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
             gated: true,
           }));
         },
-        onDone: (full) => {
+        onDone: (full, refused) => {
           const fallback = serverError ? `⚠ ${serverError}` : full || get().streaming;
-          const pendingImages = get().pendingImages;
+          // A refusal cites nothing — the retrieved chunks were weak matches
+          // the model declined to use, so chips would imply false provenance.
+          const pendingImages = refused ? [] : get().pendingImages;
           const botMsg: ChatMessage = {
             id: `b${Date.now()}`,
             role: "bot",
             text: fallback,
-            sources: sourcesToChat(get().pendingSources),
+            sources: refused ? undefined : sourcesToChat(get().pendingSources),
             images: pendingImages.length ? pendingImages : undefined,
             createdAt: Date.now(),
           };
