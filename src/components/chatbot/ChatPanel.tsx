@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { Bug, Lock, RotateCcw, Send, X } from "lucide-react";
+import { Bug, History, Lock, RotateCcw, Send, X } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -15,9 +15,11 @@ interface ChatPanelProps {
   /** When true: drop the dialog dimensions, hide the close button, and
    *  center the content as a reading column. */
   fullPage?: boolean;
+  /** Full-page mode only: toggles the sessions drawer on mobile. */
+  onToggleSessions?: () => void;
 }
 
-export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
+export function ChatPanel({ onClose, fullPage = false, onToggleSessions }: ChatPanelProps) {
   const widget = useConfigStore((s) => s.config.widget);
   const chatMode = useConfigStore((s) => s.config.chat_mode);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -50,6 +52,9 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
   }, [messages, typing]);
 
   useEffect(() => {
+    // Auto-focus on touch devices pops the keyboard (and iOS focus-zoom)
+    // the moment the panel opens — only focus where a pointer is fine.
+    if (window.matchMedia("(pointer: coarse)").matches) return;
     textareaRef.current?.focus();
   }, []);
 
@@ -74,6 +79,17 @@ export function ChatPanel({ onClose, fullPage = false }: ChatPanelProps) {
       data-empty={showSuggestions && !showGate ? "true" : undefined}
     >
       <div className="chat-head">
+        {fullPage && onToggleSessions && (
+          <button
+            type="button"
+            className="chat-head-close chat-head-sessions"
+            onClick={onToggleSessions}
+            aria-label="Toggle chat history"
+            title="Chat history"
+          >
+            <History size={15} strokeWidth={2} />
+          </button>
+        )}
         <div className="chat-avatar">{widget.initial}</div>
         <div className="chat-head-text">
           <div className="chat-name">{widget.name}</div>

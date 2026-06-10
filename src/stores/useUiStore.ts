@@ -25,6 +25,10 @@ interface UiState {
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (v: boolean) => void;
   toggleSidebar: () => void;
+  /** True while the <=1024px drawer nav is open. Session-only, never persisted. */
+  mobileNavOpen: boolean;
+  setMobileNavOpen: (v: boolean) => void;
+  toggleMobileNav: () => void;
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -38,4 +42,7 @@ export const useUiStore = create<UiState>((set, get) => ({
     persist(next);
     set({ sidebarCollapsed: next });
   },
+  mobileNavOpen: false,
+  setMobileNavOpen: (v) => set({ mobileNavOpen: v }),
+  toggleMobileNav: () => set({ mobileNavOpen: !get().mobileNavOpen }),
 }));

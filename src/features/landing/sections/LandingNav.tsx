@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { Menu, X } from "lucide-react";
 import { BrandMark } from "@/components/shared/BrandMark";
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { LandingConfig } from "@/types/config";
@@ -17,6 +19,7 @@ export function LandingNav({ config }: LandingNavProps) {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const chip = pillFromBrand(config.brand);
   const head = chip
@@ -28,9 +31,12 @@ export function LandingNav({ config }: LandingNavProps) {
     .join(" ");
 
   const handleLogout = () => {
+    setMenuOpen(false);
     logout();
     navigate("/", { replace: true });
   };
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <nav className="land-nav">
@@ -76,8 +82,48 @@ export function LandingNav({ config }: LandingNavProps) {
           <a href="#apply" className="btn btn-teal btn-sm">
             {ctaShort}
           </a>
+          <button
+            type="button"
+            className="land-nav-burger"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? (
+              <X size={20} strokeWidth={1.8} />
+            ) : (
+              <Menu size={20} strokeWidth={1.8} />
+            )}
+          </button>
         </div>
       </div>
+      {menuOpen && (
+        <div className="land-nav-mobile">
+          {config.nav.map((item) => (
+            <a
+              key={item}
+              href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+              onClick={closeMenu}
+            >
+              {item}
+            </a>
+          ))}
+          {isAuthenticated ? (
+            <>
+              <Link to="/admin/cms" onClick={closeMenu}>
+                Admin
+              </Link>
+              <button type="button" onClick={handleLogout}>
+                Log out
+              </button>
+            </>
+          ) : (
+            <Link to="/login" onClick={closeMenu}>
+              Log in
+            </Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

@@ -112,13 +112,20 @@ function SessionRow({ session, active, onOpen, onRename, onDelete }: SessionRowP
   );
 }
 
+interface ChatSessionsSidebarProps {
+  /** Mobile drawer state — ignored by the desktop layout. */
+  open?: boolean;
+  onClose?: () => void;
+}
+
 /**
  * Per-user chat-session list for the AI Help page. Lists the signed-in
  * user's saved conversations, lets them start a new one, reopen a past one,
  * and rename/delete. Rendered only on the full-page AI Help surface — the
- * floating landing widget stays session-less.
+ * floating landing widget stays session-less. On phones it slides in as an
+ * off-canvas drawer (`data-open`) and closes itself once a chat is picked.
  */
-export function ChatSessionsSidebar() {
+export function ChatSessionsSidebar({ open, onClose }: ChatSessionsSidebarProps = {}) {
   const sessions = useChatStore((s) => s.sessions);
   const loading = useChatStore((s) => s.sessionsLoading);
   const activeId = useChatStore((s) => s.sessionId);
@@ -133,9 +140,20 @@ export function ChatSessionsSidebar() {
   }, [loadSessions]);
 
   return (
-    <aside className="chat-sessions" aria-label="Chat sessions">
+    <aside
+      className="chat-sessions"
+      aria-label="Chat sessions"
+      data-open={open ? "true" : undefined}
+    >
       <div className="chat-sessions-head">
-        <button type="button" className="chat-sessions-new" onClick={reset}>
+        <button
+          type="button"
+          className="chat-sessions-new"
+          onClick={() => {
+            reset();
+            onClose?.();
+          }}
+        >
           <Plus size={15} strokeWidth={2} />
           <span>New chat</span>
         </button>
@@ -153,7 +171,10 @@ export function ChatSessionsSidebar() {
               key={s.id}
               session={s}
               active={s.id === activeId}
-              onOpen={() => void openSession(s.id)}
+              onOpen={() => {
+                void openSession(s.id);
+                onClose?.();
+              }}
               onRename={(title) => renameSession(s.id, title)}
               onDelete={() => void deleteSession(s.id)}
             />

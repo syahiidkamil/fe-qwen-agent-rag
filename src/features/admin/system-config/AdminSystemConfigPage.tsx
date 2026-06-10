@@ -268,7 +268,7 @@ export function AdminSystemConfigPage() {
 
         <label className="field">
           <div className="field-label">Top-N chunks referenced in chat</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <input
               type="number"
               min={RETRIEVAL_TOP_K_MIN}
@@ -294,7 +294,7 @@ export function AdminSystemConfigPage() {
 
         <label className="field">
           <div className="field-label">Max distinct files cited per answer</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <input
               type="number"
               min={RETRIEVAL_MAX_FILES_MIN}
@@ -320,7 +320,7 @@ export function AdminSystemConfigPage() {
 
         <label className="field">
           <div className="field-label">Relevance threshold</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
             <input
               type="text"
               inputMode="decimal"
@@ -351,7 +351,7 @@ export function AdminSystemConfigPage() {
           )}
         </label>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, flexWrap: "wrap" }}>
           <button
             type="button"
             className="btn btn-teal btn-sm"

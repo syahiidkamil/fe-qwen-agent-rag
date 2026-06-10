@@ -36,6 +36,22 @@ export function PdfChunkViewer({
   const [page, setPage] = useState(1);
   const [highlightPage, setHighlightPage] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Pre-mount guess; the effect below replaces it with the measured
+  // container width and tracks rotation/resize.
+  const [pageWidth, setPageWidth] = useState(() =>
+    Math.min(900, Math.max(280, window.innerWidth - 96)),
+  );
+
+  useEffect(() => {
+    const measure = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      setPageWidth(Math.min(900, Math.max(280, el.clientWidth - 32)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   /** Long phrases from the chunk — used to *find* the right page in the
    *  flat text content (pdf.js gives us one big string per page). */
@@ -161,7 +177,7 @@ export function PdfChunkViewer({
             </div>
           }
         >
-          <Page pageNumber={page} width={Math.min(900, window.innerWidth - 96)} />
+          <Page pageNumber={page} width={pageWidth} />
         </Document>
       </div>
 

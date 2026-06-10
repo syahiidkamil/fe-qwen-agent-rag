@@ -183,7 +183,11 @@ export function LoginPage() {
                   textTransform: "none",
                   letterSpacing: 0,
                   fontFamily: "var(--sans)",
-                  fontSize: 12,
+                  fontSize: 13,
+                  // >=44px hit area; negative margin keeps the row height.
+                  display: "inline-block",
+                  padding: "13px 0 13px 12px",
+                  margin: "-13px 0",
                 }}
               >
                 Forgot?
@@ -206,7 +210,9 @@ export function LoginPage() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              margin: "4px 0 24px",
+              // Label grew to a 44px tap target; margins absorb the extra
+              // height so the rhythm matches the old 4px/24px spacing.
+              margin: "-8px 0 12px",
             }}
           >
             <label
@@ -214,6 +220,7 @@ export function LoginPage() {
                 display: "inline-flex",
                 gap: 8,
                 alignItems: "center",
+                minHeight: 44,
                 fontSize: 13.5,
                 color: "var(--ink-2)",
                 cursor: "pointer",
@@ -224,16 +231,21 @@ export function LoginPage() {
                 {...register("remember")}
                 style={{
                   accentColor: "var(--teal)",
-                  width: 14,
-                  height: 14,
+                  width: 18,
+                  height: 18,
                 }}
               />
               Keep me signed in
             </label>
           </div>
 
-                    {(authError || misconfiguredError) && (
-            <div className="field-error" style={{ marginBottom: 12 }}>
+          {(authError || misconfiguredError) && (
+            <div
+              className="field-error"
+              role="alert"
+              aria-live="assertive"
+              style={{ marginBottom: 12 }}
+            >
               {authError ?? misconfiguredError}
             </div>
           )}
