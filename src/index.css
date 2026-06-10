@@ -2162,8 +2162,10 @@ a.cite:hover .ix { color: var(--teal-deep); }
   .suggest { padding: 12px 14px; font-size: 14px; }
   /* Source chips are tap targets too. */
   .cite { padding: 7px 10px; font-size: 11px; }
-  .dropzone { padding: 32px 16px; }
-  .dropzone-checkbox { position: static; margin-bottom: 16px; }
+  /* Stack the drop target vertically: corner-overlay checkbox becomes its
+     own row under the text instead of squeezing beside the centered title. */
+  .dropzone { flex-direction: column; gap: 18px; padding: 28px 16px 22px; }
+  .dropzone-checkbox { position: static; order: 2; }
   /* Decorative dark panel collapses to a slim brand bar on phones.
      auto 1fr keeps the bar content-sized instead of stretching to half
      the viewport (stacked grid rows otherwise share the 100dvh evenly). */
@@ -3175,4 +3177,32 @@ a.cite:hover .ix { color: var(--teal-deep); }
   .doc-viewer-card { padding: 20px 16px; }
   .doc-viewer-pager .btn { min-width: 44px; min-height: 44px; justify-content: center; }
   .doc-viewer-back { padding: 12px 8px 12px 0; }
+  /* ---- Tables collapse to card rows on phones ----
+     Horizontal scroll (the 768px fallback above) keeps data reachable but
+     reads poorly at 360-430px: sliver columns shatter filenames and the
+     actions live off-screen. Cards put the name full-width, the status/
+     tags/date/size on one meta row, and actions on their own row. */
+  .kb-table { min-width: 0; }
+  .kb-table, .kb-table tbody { display: block; }
+  .kb-table thead { display: none; }
+  .kb-table tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+  .kb-table tbody tr:last-child { border-bottom: 0; }
+  .kb-table td {
+    display: block;
+    padding: 0;
+    border-bottom: 0;
+  }
+  .kb-table .cell-main { flex: 1 1 100%; }
+  .kb-table .cell-size { margin-left: auto; }
+  .kb-table .cell-actions { flex: 1 1 100%; }
+  .kb-table .cell-actions .row-actions { justify-content: flex-end; }
+  /* The "no tags" dash is header-context noise once headers are gone. */
+  .kb-table .cell-tags:has(.tag-empty) { display: none; }
 }

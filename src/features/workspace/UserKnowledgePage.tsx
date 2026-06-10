@@ -71,7 +71,7 @@ export function UserKnowledgePage() {
             <tbody>
               {visibleCorpus.map((f) => (
                 <tr key={f.id}>
-                  <td>
+                  <td className="cell-main">
                     <button
                       type="button"
                       className="file-cell file-cell-link"
@@ -85,9 +85,9 @@ export function UserKnowledgePage() {
                       </div>
                     </button>
                   </td>
-                  <td>
+                  <td className="cell-tags">
                     {f.tags.length === 0 ? (
-                      <span style={{ color: "var(--muted-2)", fontSize: 12 }}>—</span>
+                      <span className="tag-empty" style={{ color: "var(--muted-2)", fontSize: 12 }}>—</span>
                     ) : (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                         {f.tags.map((t) => (
@@ -98,7 +98,7 @@ export function UserKnowledgePage() {
                       </div>
                     )}
                   </td>
-                  <td>
+                  <td className="cell-date">
                     <span
                       style={{
                         fontFamily: "var(--mono)",
@@ -110,6 +110,7 @@ export function UserKnowledgePage() {
                     </span>
                   </td>
                   <td
+                    className="cell-size"
                     style={{
                       textAlign: "right",
                       fontFamily: "var(--mono)",

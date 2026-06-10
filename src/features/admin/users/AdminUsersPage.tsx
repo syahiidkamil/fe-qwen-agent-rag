@@ -119,7 +119,7 @@ function UserRow({ user, isSelf, onEdit, onDelete, onDeactivate, onReactivate }:
     : "—";
   return (
     <tr>
-      <td>
+      <td className="cell-main">
         <div className="file-cell">
           <div className="user-avatar">
             {user.email.charAt(0).toUpperCase()}
@@ -130,7 +130,7 @@ function UserRow({ user, isSelf, onEdit, onDelete, onDeactivate, onReactivate }:
           </div>
         </div>
       </td>
-      <td>
+      <td className="cell-role">
         <span
           className="role-tag"
           data-role={user.role ?? "unknown"}
@@ -139,13 +139,13 @@ function UserRow({ user, isSelf, onEdit, onDelete, onDeactivate, onReactivate }:
           {roleLabel}
         </span>
       </td>
-      <td>
+      <td className="cell-status">
         <span className={`pill ${user.status === "active" ? "ingested" : "failed"}`}>
           <span className="pill-dot" />
           {user.status}
         </span>
       </td>
-      <td>
+      <td className="cell-actions">
         <div className="row-actions">
           {/* Deactivate/Reactivate — never on your own row (self-lockout). */}
           {!isSelf &&

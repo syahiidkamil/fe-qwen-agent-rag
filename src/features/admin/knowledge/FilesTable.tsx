@@ -94,7 +94,7 @@ interface FileRowProps {
 function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProps) {
   return (
     <tr>
-      <td>
+      <td className="cell-main">
         {f.status === "ingested" || f.status === "uploaded" ? (
           <button
             type="button"
@@ -130,15 +130,15 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
           </div>
         )}
       </td>
-      <td>
+      <td className="cell-status">
         <span className={`pill ${f.status}`}>
           <span className="pill-dot" />
           {f.status}
         </span>
       </td>
-      <td>
+      <td className="cell-tags">
         {f.tags.length === 0 ? (
-          <span style={{ color: "var(--muted-2)", fontSize: 12 }}>—</span>
+          <span className="tag-empty" style={{ color: "var(--muted-2)", fontSize: 12 }}>—</span>
         ) : (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {f.tags.map((t) => (
@@ -147,7 +147,7 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
           </div>
         )}
       </td>
-      <td style={{ whiteSpace: "nowrap" }}>
+      <td className="cell-date" style={{ whiteSpace: "nowrap" }}>
         <span
           style={{
             fontFamily: "var(--mono)",
@@ -159,6 +159,7 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
         </span>
       </td>
       <td
+        className="cell-size"
         style={{
           textAlign: "right",
           fontFamily: "var(--mono)",
@@ -170,7 +171,7 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
       >
         {fmtBytes(f.size)}
       </td>
-      <td>
+      <td className="cell-actions">
         <div className="row-actions">
           {f.status === "uploaded" && (
             <button type="button" className="row-act row-act-primary" onClick={onIngest}>
