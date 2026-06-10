@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { Bug, History, Lock, RotateCcw, Send, X } from "lucide-react";
+import { Bug, BrushCleaning, History, Lock, Send, X } from "lucide-react";
 import { useChatStore } from "@/stores/useChatStore";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -79,17 +79,6 @@ export function ChatPanel({ onClose, fullPage = false, onToggleSessions }: ChatP
       data-empty={showSuggestions && !showGate ? "true" : undefined}
     >
       <div className="chat-head">
-        {fullPage && onToggleSessions && (
-          <button
-            type="button"
-            className="chat-head-close chat-head-sessions"
-            onClick={onToggleSessions}
-            aria-label="Toggle chat history"
-            title="Chat history"
-          >
-            <History size={15} strokeWidth={2} />
-          </button>
-        )}
         <div className="chat-avatar">{widget.initial}</div>
         <div className="chat-head-text">
           <div className="chat-name">{widget.name}</div>
@@ -119,6 +108,18 @@ export function ChatPanel({ onClose, fullPage = false, onToggleSessions }: ChatP
             Debug
           </button>
         )}
+        {fullPage && onToggleSessions && (
+          <button
+            type="button"
+            className="chat-head-close chat-head-sessions"
+            onClick={onToggleSessions}
+            aria-label="Toggle chat history"
+            title="Chat history"
+            style={{ marginRight: 6 }}
+          >
+            <History size={15} strokeWidth={2} />
+          </button>
+        )}
         <button
           type="button"
           className="chat-head-close"
@@ -128,7 +129,7 @@ export function ChatPanel({ onClose, fullPage = false, onToggleSessions }: ChatP
           title="Clear chat"
           style={{ marginRight: 6 }}
         >
-          <RotateCcw size={13} strokeWidth={2.2} />
+          <BrushCleaning size={13} strokeWidth={2.2} />
         </button>
         {!fullPage && (
           <button

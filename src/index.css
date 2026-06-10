@@ -1874,7 +1874,14 @@ button.file-cell-link:focus-visible {
   background: var(--teal-bright);
   border: 2px solid var(--ink);
 }
-.chat-head-text { flex: 1; position: relative; z-index: 1; }
+/* min-width 0 + ellipsis: the header buttons (Debug/History/Clear) win the
+   space fight and the name/status truncate instead of wrapping. */
+.chat-head-text { flex: 1; position: relative; z-index: 1; min-width: 0; }
+.chat-head-text > div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .chat-name { font-weight: 500; font-size: 14.5px; letter-spacing: -0.005em; }
 .chat-status {
   font-family: var(--mono);
