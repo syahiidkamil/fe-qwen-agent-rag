@@ -281,6 +281,12 @@ a { color: inherit; text-decoration: none; }
 .pill-dot {
   width: 5px; height: 5px; border-radius: 999px; background: currentColor;
 }
+/* Client-only transient states (file dropped, bytes in flight). Neutral grey
+   while queued, indigo while the bytes are uploading — distinct from the teal
+   "ingesting" so a glance reads the whole pipeline. */
+.pill.queued    { color: #5B6472; background: #F1F3F6; border-color: #DDE1E8; }
+.pill.uploading { color: #3D52A0; background: #EEF1FB; border-color: #C7D0F0; }
+.pill.uploading .pill-dot { animation: pill-dot-pulse 1.2s ease-in-out infinite; }
 .pill.uploaded  { color: #7A6420; background: #FFF6E0; border-color: #F4E0A8; }
 .pill.ingesting { color: var(--teal-deep); background: var(--teal-tint); border-color: #B5E1D9; }
 /* Activity is signaled by the pulsing dot, not an inline progress bar —
@@ -1755,6 +1761,13 @@ button.file-cell-link:focus-visible {
   padding: 0;
 }
 .row-act:hover { border-color: var(--ink-2); color: var(--ink); }
+/* Locked while a row is mid-upload / mid-ingest — keep it in place but inert,
+   so the actions column doesn't reflow as files settle. */
+.row-act:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.row-act:disabled:hover { border-color: var(--rule); color: var(--ink-2); }
 .row-act-primary {
   background: var(--ink);
   color: #fff;

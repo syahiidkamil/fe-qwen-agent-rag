@@ -9,6 +9,8 @@ interface PillProps {
 }
 
 const LABELS: Record<KbFileStatus, string> = {
+  queued: "Queued",
+  uploading: "Uploading",
   uploaded: "Uploaded",
   ingesting: "Ingesting",
   ingested: "Ingested",

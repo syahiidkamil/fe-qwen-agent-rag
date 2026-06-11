@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AlertCircle, Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import type { KbFile } from "@/types/file";
-import { useFilesStore } from "@/stores/useFilesStore";
+import { useFilesStore, isPendingUpload } from "@/stores/useFilesStore";
 import { FileIcon } from "@/components/shared/FileIcon";
 import { fmtBytes } from "@/lib/format";
 import { DocumentService } from "@/services/DocumentService";
@@ -92,6 +92,13 @@ interface FileRowProps {
 }
 
 function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProps) {
+  // While a row is moving through the pipeline its server state is in flux —
+  // renaming or deleting mid-flight would race the background task, so both
+  // are locked until it settles into uploaded / ingested / failed.
+  const locked = f.status === "queued" || f.status === "uploading" || f.status === "ingesting";
+  const uploadFailed = f.status === "failed" && isPendingUpload(f.id);
+  const lockHint = "Available once this file finishes processing";
+
   return (
     <tr>
       <td className="cell-main">
@@ -118,9 +125,15 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             <FileIcon type={f.type} />
             <div>
               <div className="file-name">{f.name}</div>
+              {f.status === "queued" && (
+                <div className="file-sub">queued</div>
+              )}
+              {f.status === "uploading" && (
+                <div className="file-sub">uploading…</div>
+              )}
               {f.status === "failed" && (
                 <div className="file-sub" style={{ color: "var(--red)" }}>
-                  ingestion failed
+                  {uploadFailed ? "upload failed" : "ingestion failed"}
                 </div>
               )}
               {f.status === "ingesting" && (
@@ -213,7 +226,8 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             type="button"
             className="row-act row-act-icon"
             onClick={onRename}
-            title="Edit document"
+            disabled={locked}
+            title={locked ? lockHint : "Edit document"}
             aria-label="Edit document"
           >
             <Pencil size={12} strokeWidth={1.6} />
@@ -222,7 +236,8 @@ function FileRow({ file: f, onIngest, onRetry, onRemove, onRename }: FileRowProp
             type="button"
             className="row-act row-act-icon row-act-danger"
             onClick={onRemove}
-            title="Remove"
+            disabled={locked}
+            title={locked ? lockHint : "Remove"}
             aria-label="Remove"
           >
             <Trash2 size={12} strokeWidth={1.6} />

@@ -13,7 +13,7 @@ interface BackendDoc {
   uploaded_at: string;
 }
 
-function inferType(filename: string, mime: string | null): KbFileType {
+export function inferType(filename: string, mime: string | null): KbFileType {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "pdf") return "pdf";
   if (ext === "docx" || ext === "doc") return "docx";
